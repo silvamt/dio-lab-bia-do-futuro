@@ -166,37 +166,27 @@ def process_user_input(user_input: str):
     # Add user message
     add_message("user", user_input)
     
-    # Get agent structured response
+    # Get agent response using new dynamic approach
     try:
-        structured_response = st.session_state.agent.get_structured_response(user_input)
+        response, sources = st.session_state.agent.answer_query(user_input)
         
-        # Use LLM to verbalize the structured response
-        llm_response = st.session_state.llm_adapter.generate_response(structured_response)
-        
-        # Validate response length (ResponseValidator ensures max 2 sentences)
-        is_valid, adjusted_response = ResponseValidator.validate_response(llm_response, allow_detailed=False)
-        
-        # Get detailed response and sources from structured data
-        detailed_response = structured_response.get('detailed_response', '')
-        sources = structured_response.get('sources', [])
+        # Validate response length (max 10 sentences for mobile-friendly display)
+        is_valid, adjusted_response = ResponseValidator.validate_response(response, allow_detailed=False)
         
         if not is_valid:
-            # LLM generated too long, truncated by validator
-            # Save original LLM response as detailed if it was truncated
-            if llm_response != adjusted_response:
-                detailed_response = llm_response
-            llm_response = adjusted_response
+            # Response was too long, truncated by validator
+            response = adjusted_response
         
         # Create justification
-        justification = ResponseValidator.create_justification(llm_response, sources)
+        justification = ResponseValidator.create_justification(response, sources)
         
         # Add agent response
         add_message(
             "assistant",
-            llm_response,
+            response,
             justification=justification,
             sources=sources,
-            detailed=detailed_response if detailed_response != llm_response else ""
+            detailed=""
         )
         
     except Exception as e:
@@ -238,23 +228,26 @@ def main():
     with st.sidebar:
         st.header("ℹ️ Sobre Moara")
         st.markdown("""
-        **Moara (MOARA – Modular Orchestrated AI for Responsible Advisory)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada.
+        **Moara (MOARA – Modular Orchestrated AI for Responsible Advisory)** é um agente financeiro dinâmico que utiliza IA generativa para interpretar livremente suas perguntas e analisar todos os dados disponíveis.
         
         Posso ajudar com:
-        - 📊 Análise de gastos
+        - 📊 Análise de gastos e transações
         - 🔔 Alertas financeiros
         - 🎯 Planejamento de metas
         - 💼 Sugestões de produtos
+        - 💡 Qualquer pergunta sobre seus dados financeiros
         
         **Segurança:**
         - Respostas baseadas apenas nos seus dados
+        - Sem invenção de informações
+        - Análise transparente e rastreável
         - Sem execução de operações reais
-        - Confirmação antes de qualquer ação
         
         **IA Responsável:**
-        - IA generativa usada apenas para linguagem natural
-        - Todas as decisões financeiras são determinísticas
-        - Zero alucinação de valores ou dados
+        - IA interpreta perguntas livremente
+        - Respostas baseadas exclusivamente nos dados reais
+        - Limite de tamanho para facilitar leitura mobile
+        - Atuação como analista, não como executor
         """)
         
         # Show LLM status
