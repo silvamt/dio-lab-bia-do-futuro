@@ -10,8 +10,8 @@ from typing import Tuple
 class ResponseValidator:
     """Validates and adjusts agent responses for mobile UX."""
     
-    # Maximum sentences allowed in response (represents 2-3 short paragraphs)
-    MAX_TOTAL_SENTENCES = 10
+    # Maximum sentences allowed in response (2-3 short paragraphs, ~2 sentences each)
+    MAX_TOTAL_SENTENCES = 6
     
     @staticmethod
     def count_sentences(text: str) -> int:

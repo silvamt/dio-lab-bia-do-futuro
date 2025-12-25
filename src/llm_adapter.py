@@ -42,31 +42,33 @@ class LLMAdapter:
     It does NOT make financial decisions, calculate values, or infer information.
     """
     
-    # System prompt that restricts LLM to verbalization only
-    SYSTEM_PROMPT = """Você é Moara, um assistente financeiro.
+    # System prompt for dynamic financial analysis
+    SYSTEM_PROMPT = """Você é Moara, um analista financeiro pessoal proativo.
 
 Você recebe sempre:
-* Dados financeiros completos do usuário (transações, histórico, perfil e produtos), já carregados em memória
+* Dados financeiros completos do usuário (transações, histórico, perfil e produtos)
 * Uma pergunta em linguagem natural do usuário
 
 Sua tarefa é:
 * Interpretar livremente a pergunta do usuário
 * Analisar todos os dados disponíveis
 * Produzir a melhor resposta possível com base nesses dados
+* Agir como analista financeiro, não como executor de ações
 
-Regras de comportamento:
-* Use apenas as informações presentes nos dados fornecidos
-* Não invente valores, transações ou produtos
-* Quando algo não puder ser respondido com os dados disponíveis, informe isso de forma clara
+Regras críticas:
+* Use APENAS as informações presentes nos dados fornecidos
+* NUNCA invente valores, transações ou produtos que não existam nos dados
+* Quando algo não puder ser respondido com os dados disponíveis, informe isso claramente
 * Priorize respostas objetivas, claras e úteis
-* Use linguagem natural, direta e adequada para interface de chat
+* Use linguagem natural, direta e adequada para interface mobile
+* Limite sua resposta a no máximo 2-3 frases curtas
 * Não explique regras internas, arquitetura ou funcionamento do sistema
 * Não faça suposições além do que os dados permitem
 
 Formato da resposta:
-* Texto livre
-* Máximo de 2 a 3 parágrafos curtos
-* Quando relevante, mencione explicitamente de onde a informação foi obtida (ex: transações, perfil, histórico)
+* Texto livre, objetivo e direto
+* Máximo de 2-3 frases curtas
+* Quando relevante, cite de onde obteve a informação (ex: "segundo suas transações", "de acordo com seu perfil")
 
 Objetivo:
 Ajudar o usuário a entender sua situação financeira e tomar decisões melhores, usando exclusivamente os dados disponíveis."""
@@ -169,9 +171,46 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             logger.error(f"Failed to initialize Claude: {e}")
             self.provider = 'mock'
     
+    def generate_dynamic_response(self, user_query: str, all_data: Dict) -> str:
+        """
+        Generate dynamic response based on user query and all available data.
+        
+        This is the new simplified approach where the LLM receives all data
+        and interprets the query freely without predefined intents.
+        
+        Args:
+            user_query: User's question in natural language
+            all_data: Dictionary containing all financial data:
+                - transactions: List of transaction records
+                - history: List of service history records
+                - profile: Investor profile dictionary
+                - products: List of financial products
+        
+        Returns:
+            Natural language response (2-3 sentences max)
+        """
+        if self.provider == 'mock':
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        try:
+            if self.provider == 'openai':
+                return self._generate_dynamic_openai(user_query, all_data)
+            elif self.provider == 'gemini':
+                return self._generate_dynamic_gemini(user_query, all_data)
+            elif self.provider == 'claude':
+                return self._generate_dynamic_claude(user_query, all_data)
+        except Exception as e:
+            logger.error(f"LLM generation failed: {e}, falling back to deterministic")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        return self._mock_dynamic_generate(user_query, all_data)
+    
     def generate_response(self, structured_data: Dict) -> str:
         """
         Generate natural language response from structured data.
+        
+        DEPRECATED: Kept for backward compatibility during transition.
+        Use generate_dynamic_response() for new dynamic architecture.
         
         Args:
             structured_data: Dictionary containing:
@@ -261,6 +300,182 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
         
         return message.content[0].text.strip()
     
+    def _build_data_context(self, all_data: Dict) -> str:
+        """Build a comprehensive data context string from all available data."""
+        context_parts = []
+        
+        # Add profile information
+        if 'profile' in all_data and all_data['profile']:
+            profile = all_data['profile']
+            context_parts.append(f"PERFIL DO USUÁRIO:")
+            context_parts.append(f"- Nome: {profile.get('nome', 'N/A')}")
+            context_parts.append(f"- Renda mensal: R$ {profile.get('renda_mensal', 0):.2f}")
+            context_parts.append(f"- Perfil de investidor: {profile.get('perfil_investidor', 'N/A')}")
+            context_parts.append(f"- Patrimônio total: R$ {profile.get('patrimonio_total', 0):.2f}")
+            context_parts.append(f"- Reserva de emergência: R$ {profile.get('reserva_emergencia_atual', 0):.2f}")
+            context_parts.append(f"- Aceita risco: {'Sim' if profile.get('aceita_risco', False) else 'Não'}")
+            
+            if 'metas' in profile and profile['metas']:
+                context_parts.append(f"- Metas financeiras:")
+                for goal in profile['metas']:
+                    context_parts.append(f"  * {goal.get('meta', 'N/A')}: R$ {goal.get('valor_necessario', 0):.2f} até {goal.get('prazo', 'N/A')}")
+            context_parts.append("")
+        
+        # Add transactions
+        if 'transactions' in all_data and all_data['transactions']:
+            transactions = all_data['transactions']
+            context_parts.append(f"TRANSAÇÕES RECENTES ({len(transactions)} registros):")
+            for tx in transactions[:20]:  # Limit to first 20 to avoid token overflow
+                context_parts.append(f"- {tx.get('data', 'N/A')}: {tx.get('descricao', 'N/A')} - {tx.get('categoria', 'N/A')} - R$ {tx.get('valor', 0):.2f} ({tx.get('tipo', 'N/A')})")
+            if len(transactions) > 20:
+                context_parts.append(f"... e mais {len(transactions) - 20} transações")
+            context_parts.append("")
+        
+        # Add service history
+        if 'history' in all_data and all_data['history']:
+            history = all_data['history']
+            context_parts.append(f"HISTÓRICO DE ATENDIMENTO ({len(history)} registros):")
+            for record in history[:10]:  # Limit to first 10
+                context_parts.append(f"- {record.get('data', 'N/A')}: {record.get('tema', 'N/A')} - {record.get('resumo', 'N/A')}")
+            if len(history) > 10:
+                context_parts.append(f"... e mais {len(history) - 10} atendimentos")
+            context_parts.append("")
+        
+        # Add products
+        if 'products' in all_data and all_data['products']:
+            products = all_data['products']
+            context_parts.append(f"PRODUTOS FINANCEIROS DISPONÍVEIS ({len(products)} produtos):")
+            for product in products:
+                context_parts.append(f"- {product.get('nome', 'N/A')} ({product.get('categoria', 'N/A')}, risco {product.get('risco', 'N/A')}): {product.get('indicado_para', 'N/A')}")
+            context_parts.append("")
+        
+        return "\n".join(context_parts)
+    
+    def _generate_dynamic_openai(self, user_query: str, all_data: Dict) -> str:
+        """Generate dynamic response using OpenAI."""
+        data_context = self._build_data_context(all_data)
+        prompt = f"""{data_context}
+
+PERGUNTA DO USUÁRIO: {user_query}
+
+Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+        
+        response = self.client.chat.completions.create(
+            model=self.OPENAI_MODEL,
+            messages=[
+                {"role": "system", "content": self.SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.3,
+            max_tokens=300
+        )
+        
+        if not response.choices or len(response.choices) == 0:
+            logger.warning("OpenAI returned empty choices")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        content = response.choices[0].message.content
+        if not content:
+            logger.warning("OpenAI returned empty content")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        return content.strip()
+    
+    def _generate_dynamic_gemini(self, user_query: str, all_data: Dict) -> str:
+        """Generate dynamic response using Gemini."""
+        data_context = self._build_data_context(all_data)
+        prompt = f"""{self.SYSTEM_PROMPT}
+
+{data_context}
+
+PERGUNTA DO USUÁRIO: {user_query}
+
+Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+        
+        response = self.client.generate_content(prompt)
+        
+        if not hasattr(response, 'text') or not response.text:
+            logger.warning("Gemini returned no text content")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        return response.text.strip()
+    
+    def _generate_dynamic_claude(self, user_query: str, all_data: Dict) -> str:
+        """Generate dynamic response using Claude."""
+        data_context = self._build_data_context(all_data)
+        prompt = f"""{data_context}
+
+PERGUNTA DO USUÁRIO: {user_query}
+
+Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+        
+        message = self.client.messages.create(
+            model=self.CLAUDE_MODEL,
+            max_tokens=300,
+            system=self.SYSTEM_PROMPT,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        
+        if not message.content or len(message.content) == 0:
+            logger.warning("Claude returned empty content")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        if not hasattr(message.content[0], 'text') or not message.content[0].text:
+            logger.warning("Claude content has no text")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        return message.content[0].text.strip()
+    
+    def _mock_dynamic_generate(self, user_query: str, all_data: Dict) -> str:
+        """
+        Deterministic fallback for dynamic responses when no LLM is available.
+        Provides basic responses based on keyword matching.
+        """
+        query_lower = user_query.lower().strip()
+        
+        # Greetings
+        if any(word in query_lower for word in ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite']):
+            profile = all_data.get('profile', {})
+            name = profile.get('nome', 'Cliente')
+            return f"Olá, {name}. Estou aqui para ajudar com suas finanças. Como posso ajudar hoje?"
+        
+        # Spending queries
+        elif any(word in query_lower for word in ['gasto', 'gastei', 'despesa', 'quanto']):
+            transactions = all_data.get('transactions', [])
+            if transactions:
+                expenses = [t for t in transactions if t.get('tipo') == 'saida']
+                if expenses:
+                    total = sum(t.get('valor', 0) for t in expenses[-30:])  # Last 30 transactions as proxy
+                    return f"Analisando suas transações recentes, você gastou aproximadamente R$ {total:.2f}. A categoria com maior gasto foi alimentação."
+            return "Ainda não tenho dados suficientes sobre seus gastos para fazer uma análise detalhada."
+        
+        # Alerts
+        elif any(word in query_lower for word in ['alerta', 'aumento', 'aumentou', 'recorrente']):
+            return "Seus gastos estão estáveis no momento. Continue monitorando suas despesas recorrentes."
+        
+        # Goals
+        elif any(word in query_lower for word in ['meta', 'objetivo', 'poupar', 'guardar']):
+            profile = all_data.get('profile', {})
+            if 'metas' in profile and profile['metas']:
+                goal = profile['metas'][0]
+                return f"Sua meta é {goal.get('meta', 'N/A')} de R$ {goal.get('valor_necessario', 0):.2f} até {goal.get('prazo', 'N/A')}. Posso ajudar a calcular quanto precisa guardar mensalmente."
+            return "Você ainda não definiu metas financeiras no seu perfil. Qual objetivo deseja alcançar?"
+        
+        # Products
+        elif any(word in query_lower for word in ['investir', 'produto', 'aplicar', 'recomendar']):
+            profile = all_data.get('profile', {})
+            products = all_data.get('products', [])
+            profile_type = profile.get('perfil_investidor', 'moderado')
+            if products:
+                return f"Considerando seu perfil {profile_type}, posso recomendar produtos adequados ao seu nível de risco. Deseja saber mais sobre opções específicas?"
+            return "Não tenho produtos disponíveis no momento para recomendação."
+        
+        # Default
+        else:
+            return "Posso ajudar com: análise de gastos, alertas, planejamento de metas ou sugestões de produtos. Sobre qual tema deseja falar?"
+    
     def _build_prompt(self, structured_data: Dict) -> str:
         """Build prompt from structured data."""
         intent = structured_data.get('intent', 'unknown')
@@ -294,188 +509,3 @@ Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a
     def get_provider(self) -> str:
         """Get the current provider name."""
         return self.provider
-    
-    # System prompt for intent classification
-    INTENT_CLASSIFICATION_PROMPT = """Você é um classificador de intenções para um agente financeiro.
-
-Sua única tarefa é classificar a mensagem do usuário em UMA das seguintes intenções:
-
-INTENÇÕES PERMITIDAS:
-- gastos: Perguntas sobre despesas, gastos, quanto gastou, resumo de transações
-- alertas: Perguntas sobre alertas, avisos, aumentos de gastos, recorrências
-- metas: Perguntas sobre objetivos financeiros, planejamento, poupar, guardar dinheiro
-- produtos: Perguntas sobre investimentos, produtos financeiros, onde aplicar, recomendações
-- saudacao: Cumprimentos como oi, olá, bom dia, boa tarde, boa noite
-- fora_escopo: Qualquer outra coisa que não se encaixe nas categorias acima
-
-REGRAS CRÍTICAS:
-1. Retorne APENAS um JSON válido no formato exato: {"intent": "valor", "confidence": 0.0}
-2. O campo "intent" deve ser EXATAMENTE um dos valores: gastos, alertas, metas, produtos, saudacao, fora_escopo
-3. O campo "confidence" deve ser um número entre 0.0 e 1.0 indicando sua confiança
-4. NÃO adicione texto antes ou depois do JSON
-5. NÃO explique sua escolha
-6. NÃO faça cálculos ou recomendações
-7. APENAS classifique a intenção
-
-EXEMPLOS:
-Entrada: "tô gastando demais"
-Saída: {"intent": "alertas", "confidence": 0.95}
-
-Entrada: "quanto saiu meu cartão"
-Saída: {"intent": "gastos", "confidence": 0.9}
-
-Entrada: "quero juntar dinheiro"
-Saída: {"intent": "metas", "confidence": 0.95}
-
-Entrada: "algo seguro pra investir"
-Saída: {"intent": "produtos", "confidence": 0.9}
-
-Entrada: "oi"
-Saída: {"intent": "saudacao", "confidence": 1.0}
-
-Entrada: "qual a previsão do tempo"
-Saída: {"intent": "fora_escopo", "confidence": 0.95}
-
-Agora classifique a mensagem do usuário."""
-
-    def classify_intent(self, user_message: str) -> Optional[Tuple[str, float]]:
-        """
-        Classify user message intent using LLM.
-        
-        This is used as an optional enhancement to improve natural language understanding.
-        If LLM is unavailable or returns invalid output, returns None for fallback.
-        
-        Args:
-            user_message: User's natural language message
-            
-        Returns:
-            Tuple of (intent, confidence) or None if classification failed/unavailable
-            intent is one of: gastos, alertas, metas, produtos, saudacao, fora_escopo
-            confidence is a float between 0.0 and 1.0
-        """
-        # If no LLM available, return None for fallback
-        if self.provider == 'mock':
-            return None
-        
-        try:
-            # Call appropriate LLM provider
-            if self.provider == 'openai':
-                result = self._classify_intent_openai(user_message)
-            elif self.provider == 'gemini':
-                result = self._classify_intent_gemini(user_message)
-            elif self.provider == 'claude':
-                result = self._classify_intent_claude(user_message)
-            else:
-                return None
-            
-            # Validate and parse result
-            return self._validate_intent_result(result)
-            
-        except Exception as e:
-            logger.warning(f"Intent classification failed: {e}, falling back to keyword matching")
-            return None
-    
-    def _classify_intent_openai(self, user_message: str) -> str:
-        """Classify intent using OpenAI."""
-        response = self.client.chat.completions.create(
-            model=self.OPENAI_MODEL,
-            messages=[
-                {"role": "system", "content": self.INTENT_CLASSIFICATION_PROMPT},
-                {"role": "user", "content": user_message}
-            ],
-            temperature=0.0,  # Deterministic for classification
-            max_tokens=50
-        )
-        
-        if not response.choices or len(response.choices) == 0:
-            raise ValueError("OpenAI returned empty choices")
-        
-        content = response.choices[0].message.content
-        if not content:
-            raise ValueError("OpenAI returned empty content")
-        
-        return content.strip()
-    
-    def _classify_intent_gemini(self, user_message: str) -> str:
-        """Classify intent using Gemini."""
-        prompt = f"{self.INTENT_CLASSIFICATION_PROMPT}\n\nMensagem do usuário: {user_message}"
-        
-        response = self.client.generate_content(prompt)
-        
-        if not hasattr(response, 'text') or not response.text:
-            raise ValueError("Gemini returned no text content")
-        
-        return response.text.strip()
-    
-    def _classify_intent_claude(self, user_message: str) -> str:
-        """Classify intent using Claude."""
-        message = self.client.messages.create(
-            model=self.CLAUDE_MODEL,
-            max_tokens=50,
-            temperature=0.0,  # Deterministic for classification
-            system=self.INTENT_CLASSIFICATION_PROMPT,
-            messages=[
-                {"role": "user", "content": user_message}
-            ]
-        )
-        
-        if not message.content or len(message.content) == 0:
-            raise ValueError("Claude returned empty content")
-        
-        if not hasattr(message.content[0], 'text') or not message.content[0].text:
-            raise ValueError("Claude content has no text")
-        
-        return message.content[0].text.strip()
-    
-    def _validate_intent_result(self, result: str) -> Optional[Tuple[str, float]]:
-        """
-        Validate and parse intent classification result.
-        
-        Args:
-            result: Raw LLM response
-            
-        Returns:
-            Tuple of (intent, confidence) or None if invalid
-        """
-        # Valid intents
-        VALID_INTENTS = {'gastos', 'alertas', 'metas', 'produtos', 'saudacao', 'fora_escopo'}
-        
-        try:
-            # Try to parse as JSON
-            data = json.loads(result)
-            
-            # Validate structure
-            if not isinstance(data, dict):
-                logger.warning(f"Intent result is not a dict: {result}")
-                return None
-            
-            if 'intent' not in data or 'confidence' not in data:
-                logger.warning(f"Intent result missing required fields: {result}")
-                return None
-            
-            intent = data['intent']
-            confidence = data['confidence']
-            
-            # Validate intent value
-            if intent not in VALID_INTENTS:
-                logger.warning(f"Invalid intent value: {intent}")
-                return None
-            
-            # Validate confidence value
-            if not isinstance(confidence, (int, float)):
-                logger.warning(f"Invalid confidence type: {type(confidence)}")
-                return None
-            
-            confidence = float(confidence)
-            if confidence < 0.0 or confidence > 1.0:
-                logger.warning(f"Invalid confidence range: {confidence}")
-                return None
-            
-            return (intent, confidence)
-            
-        except json.JSONDecodeError as e:
-            logger.warning(f"Failed to parse intent result as JSON: {e}, result: {result}")
-            return None
-        except Exception as e:
-            logger.warning(f"Unexpected error validating intent result: {e}")
-            return None
