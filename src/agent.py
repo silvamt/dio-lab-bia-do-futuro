@@ -137,39 +137,4 @@ class FinancialAgent:
             sources.append('dados do sistema')
         
         return sources
-    def _extract_sources_from_response(self, response: str, query: str) -> List[str]:
-        """
-        Extract likely data sources based on response content and query.
-        
-        This is a simple heuristic - in production, LLM could return structured sources.
-        """
-        sources = []
-        response_lower = response.lower()
-        query_lower = query.lower()
-        
-        # Check for transaction-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['transação', 'transações', 'gasto', 'gastos', 'despesa', 'despesas', 'gastou']):
-            sources.append('transacoes.csv')
-        
-        # Check for profile-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['perfil', 'renda', 'salário', 'meta', 'metas', 'objetivo', 'reserva']):
-            sources.append('perfil_investidor.json')
-        
-        # Check for product-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['produto', 'produtos', 'investimento', 'investir', 'aplicar', 'recomend']):
-            sources.append('produtos_financeiros.json')
-        
-        # Check for history-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['histórico', 'atendimento', 'atendimentos', 'anterior']):
-            sources.append('historico_atendimento.csv')
-        
-        # Default to general data if no specific sources identified
-        if not sources:
-            sources.append('dados do sistema')
-        
-        return sources
 
