@@ -87,14 +87,24 @@ def initialize_session_state():
     if "messages" not in st.session_state:
         st.session_state.messages = []
     
+    # Initialize LLM adapter first (will use mock if no API key available)
+    if "llm_adapter" not in st.session_state:
+        st.session_state.llm_adapter = LLMAdapter()
+    
     if "agent" not in st.session_state:
         try:
             # Load data
             loader = DataLoader()
             transactions, history, profile, products = loader.load_all_data()
             
-            # Initialize agent
-            st.session_state.agent = FinancialAgent(transactions, history, profile, products)
+            # Initialize agent with LLM adapter for optional intent classification
+            st.session_state.agent = FinancialAgent(
+                transactions, 
+                history, 
+                profile, 
+                products,
+                llm_adapter=st.session_state.llm_adapter
+            )
             st.session_state.data_loaded = True
             st.session_state.error = None
             
@@ -105,10 +115,6 @@ def initialize_session_state():
             st.session_state.data_loaded = False
             st.session_state.error = str(e)
             st.session_state.agent = None
-    
-    # Initialize LLM adapter (will use mock if no API key available)
-    if "llm_adapter" not in st.session_state:
-        st.session_state.llm_adapter = LLMAdapter()
     
     if "show_details" not in st.session_state:
         st.session_state.show_details = {}

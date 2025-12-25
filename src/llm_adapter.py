@@ -2,9 +2,12 @@
 LLM Adapter for Natural Language Generation.
 Uses LLM as NLG layer to verbalize structured responses from the agent.
 LLM does NOT make financial decisions, only transforms data into natural text.
+
+Also provides optional intent classification for natural language routing.
 """
 
 import os
+import json
 from typing import Dict, Optional, Tuple
 import logging
 
@@ -283,3 +286,188 @@ Gere uma resposta clara e objetiva, mantendo todos os valores exatos fornecidos.
     def get_provider(self) -> str:
         """Get the current provider name."""
         return self.provider
+    
+    # System prompt for intent classification
+    INTENT_CLASSIFICATION_PROMPT = """Você é um classificador de intenções para um agente financeiro.
+
+Sua única tarefa é classificar a mensagem do usuário em UMA das seguintes intenções:
+
+INTENÇÕES PERMITIDAS:
+- gastos: Perguntas sobre despesas, gastos, quanto gastou, resumo de transações
+- alertas: Perguntas sobre alertas, avisos, aumentos de gastos, recorrências
+- metas: Perguntas sobre objetivos financeiros, planejamento, poupar, guardar dinheiro
+- produtos: Perguntas sobre investimentos, produtos financeiros, onde aplicar, recomendações
+- saudacao: Cumprimentos como oi, olá, bom dia, boa tarde, boa noite
+- fora_escopo: Qualquer outra coisa que não se encaixe nas categorias acima
+
+REGRAS CRÍTICAS:
+1. Retorne APENAS um JSON válido no formato exato: {"intent": "valor", "confidence": 0.0}
+2. O campo "intent" deve ser EXATAMENTE um dos valores: gastos, alertas, metas, produtos, saudacao, fora_escopo
+3. O campo "confidence" deve ser um número entre 0.0 e 1.0 indicando sua confiança
+4. NÃO adicione texto antes ou depois do JSON
+5. NÃO explique sua escolha
+6. NÃO faça cálculos ou recomendações
+7. APENAS classifique a intenção
+
+EXEMPLOS:
+Entrada: "tô gastando demais"
+Saída: {"intent": "alertas", "confidence": 0.95}
+
+Entrada: "quanto saiu meu cartão"
+Saída: {"intent": "gastos", "confidence": 0.9}
+
+Entrada: "quero juntar dinheiro"
+Saída: {"intent": "metas", "confidence": 0.95}
+
+Entrada: "algo seguro pra investir"
+Saída: {"intent": "produtos", "confidence": 0.9}
+
+Entrada: "oi"
+Saída: {"intent": "saudacao", "confidence": 1.0}
+
+Entrada: "qual a previsão do tempo"
+Saída: {"intent": "fora_escopo", "confidence": 0.95}
+
+Agora classifique a mensagem do usuário."""
+
+    def classify_intent(self, user_message: str) -> Optional[Tuple[str, float]]:
+        """
+        Classify user message intent using LLM.
+        
+        This is used as an optional enhancement to improve natural language understanding.
+        If LLM is unavailable or returns invalid output, returns None for fallback.
+        
+        Args:
+            user_message: User's natural language message
+            
+        Returns:
+            Tuple of (intent, confidence) or None if classification failed/unavailable
+            intent is one of: gastos, alertas, metas, produtos, saudacao, fora_escopo
+            confidence is a float between 0.0 and 1.0
+        """
+        # If no LLM available, return None for fallback
+        if self.provider == 'mock':
+            return None
+        
+        try:
+            # Call appropriate LLM provider
+            if self.provider == 'openai':
+                result = self._classify_intent_openai(user_message)
+            elif self.provider == 'gemini':
+                result = self._classify_intent_gemini(user_message)
+            elif self.provider == 'claude':
+                result = self._classify_intent_claude(user_message)
+            else:
+                return None
+            
+            # Validate and parse result
+            return self._validate_intent_result(result)
+            
+        except Exception as e:
+            logger.warning(f"Intent classification failed: {e}, falling back to keyword matching")
+            return None
+    
+    def _classify_intent_openai(self, user_message: str) -> str:
+        """Classify intent using OpenAI."""
+        response = self.client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": self.INTENT_CLASSIFICATION_PROMPT},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.0,  # Deterministic for classification
+            max_tokens=50
+        )
+        
+        if not response.choices or len(response.choices) == 0:
+            raise ValueError("OpenAI returned empty choices")
+        
+        content = response.choices[0].message.content
+        if not content:
+            raise ValueError("OpenAI returned empty content")
+        
+        return content.strip()
+    
+    def _classify_intent_gemini(self, user_message: str) -> str:
+        """Classify intent using Gemini."""
+        prompt = f"{self.INTENT_CLASSIFICATION_PROMPT}\n\nMensagem do usuário: {user_message}"
+        
+        response = self.client.generate_content(prompt)
+        
+        if not hasattr(response, 'text') or not response.text:
+            raise ValueError("Gemini returned no text content")
+        
+        return response.text.strip()
+    
+    def _classify_intent_claude(self, user_message: str) -> str:
+        """Classify intent using Claude."""
+        message = self.client.messages.create(
+            model=self.CLAUDE_MODEL,
+            max_tokens=50,
+            temperature=0.0,  # Deterministic for classification
+            system=self.INTENT_CLASSIFICATION_PROMPT,
+            messages=[
+                {"role": "user", "content": user_message}
+            ]
+        )
+        
+        if not message.content or len(message.content) == 0:
+            raise ValueError("Claude returned empty content")
+        
+        if not hasattr(message.content[0], 'text') or not message.content[0].text:
+            raise ValueError("Claude content has no text")
+        
+        return message.content[0].text.strip()
+    
+    def _validate_intent_result(self, result: str) -> Optional[Tuple[str, float]]:
+        """
+        Validate and parse intent classification result.
+        
+        Args:
+            result: Raw LLM response
+            
+        Returns:
+            Tuple of (intent, confidence) or None if invalid
+        """
+        # Valid intents
+        VALID_INTENTS = {'gastos', 'alertas', 'metas', 'produtos', 'saudacao', 'fora_escopo'}
+        
+        try:
+            # Try to parse as JSON
+            data = json.loads(result)
+            
+            # Validate structure
+            if not isinstance(data, dict):
+                logger.warning(f"Intent result is not a dict: {result}")
+                return None
+            
+            if 'intent' not in data or 'confidence' not in data:
+                logger.warning(f"Intent result missing required fields: {result}")
+                return None
+            
+            intent = data['intent']
+            confidence = data['confidence']
+            
+            # Validate intent value
+            if intent not in VALID_INTENTS:
+                logger.warning(f"Invalid intent value: {intent}")
+                return None
+            
+            # Validate confidence value
+            if not isinstance(confidence, (int, float)):
+                logger.warning(f"Invalid confidence type: {type(confidence)}")
+                return None
+            
+            confidence = float(confidence)
+            if confidence < 0.0 or confidence > 1.0:
+                logger.warning(f"Invalid confidence range: {confidence}")
+                return None
+            
+            return (intent, confidence)
+            
+        except json.JSONDecodeError as e:
+            logger.warning(f"Failed to parse intent result as JSON: {e}, result: {result}")
+            return None
+        except Exception as e:
+            logger.warning(f"Unexpected error validating intent result: {e}")
+            return None
