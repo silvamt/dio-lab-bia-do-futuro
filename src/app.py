@@ -168,7 +168,12 @@ def process_user_input(user_input: str):
     
     # Get agent response using new dynamic approach
     try:
-        response, sources = st.session_state.agent.answer_query(user_input)
+        # Defensive unpacking to handle edge cases
+        result = st.session_state.agent.answer_query(user_input)
+        if isinstance(result, tuple) and len(result) >= 2:
+            response, sources = result[0], result[1]
+        else:
+            response, sources = str(result), []
         
         # Validate response length (max 10 sentences for mobile-friendly display)
         is_valid, adjusted_response = ResponseValidator.validate_response(response, allow_detailed=False)
