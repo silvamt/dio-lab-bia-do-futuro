@@ -5,7 +5,7 @@ Implements deterministic rules for alerts and financial planning.
 
 import pandas as pd
 from datetime import datetime, timedelta
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Any
 
 
 class FinancialAgent:
@@ -211,6 +211,211 @@ class FinancialAgent:
         except Exception as e:
             return False, f"Erro ao calcular resumo: {str(e)}", ["transacoes.csv"]
     
+    def get_structured_response(self, query: str) -> Dict[str, Any]:
+        """
+        Process user query and return structured response for LLM verbalization.
+        
+        This method returns structured data (intent, calculated values, base message)
+        that will be sent to the LLM for natural language generation.
+        
+        Args:
+            query: User question or command
+            
+        Returns:
+            Dictionary containing:
+                - intent: Type of response
+                - data: Calculated values and information
+                - base_message: Pre-formatted message (fallback)
+                - detailed_response: Extended information
+                - sources: Data sources used
+        """
+        query_lower = query.lower().strip()
+        
+        # Goal planning queries
+        if any(word in query_lower for word in ['meta', 'objetivo', 'poupar', 'guardar']):
+            if 'metas' in self.profile and len(self.profile['metas']) > 0:
+                first_goal = self.profile['metas'][0]
+                goal_value = first_goal.get('valor_necessario', 0)
+                
+                try:
+                    deadline = datetime.strptime(first_goal.get('prazo', ''), '%Y-%m')
+                    months = max(1, (deadline.year - datetime.now().year) * 12 + 
+                                deadline.month - datetime.now().month)
+                except:
+                    months = 12
+                
+                success, msg, sources = self.calculate_goal_planning(goal_value, months)
+                
+                monthly_needed = goal_value / months
+                income = self.profile.get('renda_mensal', 0)
+                pct_income = (monthly_needed / income * 100) if income > 0 else 0
+                profile_type = self.profile.get('perfil_investidor', 'moderado')
+                
+                return {
+                    'intent': 'goal_planning',
+                    'data': {
+                        'goal_value': goal_value,
+                        'months': months,
+                        'monthly_needed': monthly_needed,
+                        'pct_income': pct_income,
+                        'profile_type': profile_type
+                    },
+                    'base_message': msg,
+                    'detailed_response': msg,
+                    'sources': sources
+                }
+            else:
+                return {
+                    'intent': 'goal_planning_missing',
+                    'data': {},
+                    'base_message': "Informe seu objetivo e prazo para calcular valor mensal. Qual meta deseja alcançar?",
+                    'detailed_response': "",
+                    'sources': ["perfil_investidor.json:metas"]
+                }
+        
+        # Spending queries
+        elif any(word in query_lower for word in ['gasto', 'gastei', 'despesa', 'quanto']):
+            success, msg, sources = self.get_spending_summary()
+            
+            if success and len(self.transactions) > 0:
+                expenses = self.transactions[self.transactions['tipo'] == 'saida']
+                latest_date = expenses['data'].max()
+                cutoff_date = latest_date - timedelta(days=30)
+                recent = expenses[expenses['data'] >= cutoff_date]
+                
+                total = recent['valor'].sum()
+                top_category = recent.groupby('categoria')['valor'].sum().idxmax()
+                top_value = recent.groupby('categoria')['valor'].sum().max()
+                
+                return {
+                    'intent': 'spending_summary',
+                    'data': {
+                        'total': total,
+                        'days': 30,
+                        'top_category': top_category,
+                        'top_value': top_value
+                    },
+                    'base_message': msg,
+                    'detailed_response': msg,
+                    'sources': sources
+                }
+            
+            return {
+                'intent': 'spending_summary',
+                'data': {},
+                'base_message': msg,
+                'detailed_response': msg,
+                'sources': sources
+            }
+        
+        # Alert queries
+        elif any(word in query_lower for word in ['alerta', 'aumento', 'aumentou']):
+            success, msg, sources = self.detect_spending_increase()
+            if success:
+                expenses = self.transactions[self.transactions['tipo'] == 'saida']
+                latest_date = expenses['data'].max()
+                period_start = latest_date - timedelta(days=7)
+                previous_start = period_start - timedelta(days=7)
+                
+                recent_expenses = expenses[expenses['data'] >= period_start]
+                previous_expenses = expenses[(expenses['data'] >= previous_start) & 
+                                            (expenses['data'] < period_start)]
+                
+                recent_total = recent_expenses['valor'].sum()
+                previous_total = previous_expenses['valor'].sum()
+                increase_pct = ((recent_total - previous_total) / previous_total) * 100 if previous_total > 0 else 0
+                
+                return {
+                    'intent': 'spending_alert',
+                    'data': {
+                        'increase_pct': increase_pct,
+                        'days': 7,
+                        'recent_total': recent_total,
+                        'previous_total': previous_total
+                    },
+                    'base_message': msg,
+                    'detailed_response': msg,
+                    'sources': sources
+                }
+            else:
+                success, msg, sources = self.detect_recurring_expenses()
+                if success:
+                    return {
+                        'intent': 'recurring_expenses',
+                        'data': {},
+                        'base_message': msg,
+                        'detailed_response': msg,
+                        'sources': sources
+                    }
+                else:
+                    return {
+                        'intent': 'no_alerts',
+                        'data': {},
+                        'base_message': "Sem alertas no momento. Seus gastos estão estáveis.",
+                        'detailed_response': "",
+                        'sources': ["transacoes.csv"]
+                    }
+        
+        # Investment/product queries
+        elif any(word in query_lower for word in ['investir', 'produto', 'aplicar', 'recomendar']):
+            success, msg, sources = self.suggest_product()
+            
+            profile_type = self.profile.get('perfil_investidor', 'moderado').lower()
+            accepts_risk = self.profile.get('aceita_risco', False)
+            
+            if success and self.products:
+                risk_mapping = {
+                    'conservador': 'baixo',
+                    'moderado': 'medio' if accepts_risk else 'baixo',
+                    'arrojado': 'alto'
+                }
+                target_risk = risk_mapping.get(profile_type, 'baixo')
+                suitable_products = [p for p in self.products if p['risco'] == target_risk]
+                
+                if suitable_products:
+                    product = suitable_products[0]
+                    return {
+                        'intent': 'product_suggestion',
+                        'data': {
+                            'profile_type': profile_type,
+                            'product_name': product['nome'],
+                            'product_description': product['indicado_para'],
+                            'risk_level': target_risk
+                        },
+                        'base_message': msg,
+                        'detailed_response': msg,
+                        'sources': sources
+                    }
+            
+            return {
+                'intent': 'product_suggestion',
+                'data': {},
+                'base_message': msg,
+                'detailed_response': msg,
+                'sources': sources
+            }
+        
+        # Greetings
+        elif any(word in query_lower for word in ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite']):
+            name = self.profile.get('nome', 'Cliente')
+            return {
+                'intent': 'greeting',
+                'data': {'name': name},
+                'base_message': f"Olá, {name}. Estou aqui para ajudar com suas finanças. Como posso ajudar hoje?",
+                'detailed_response': "",
+                'sources': []
+            }
+        
+        # Default response
+        else:
+            return {
+                'intent': 'help',
+                'data': {},
+                'base_message': "Posso ajudar com: gastos, alertas, metas ou produtos financeiros. Sobre qual tema deseja falar?",
+                'detailed_response': "",
+                'sources': []
+            }
+    
     def answer_query(self, query: str) -> Tuple[str, str, List[str]]:
         """
         Process user query and return appropriate response.
@@ -221,59 +426,9 @@ class FinancialAgent:
         Returns:
             Tuple of (short_response, detailed_response, sources)
         """
-        query_lower = query.lower().strip()
-        
-        # Goal planning queries
-        if any(word in query_lower for word in ['meta', 'objetivo', 'poupar', 'guardar']):
-            # Check if user provided goal details
-            if 'metas' in self.profile and len(self.profile['metas']) > 0:
-                first_goal = self.profile['metas'][0]
-                goal_value = first_goal.get('valor_necessario', 0)
-                
-                # Calculate months from deadline
-                try:
-                    deadline = datetime.strptime(first_goal.get('prazo', ''), '%Y-%m')
-                    months = max(1, (deadline.year - datetime.now().year) * 12 + 
-                                deadline.month - datetime.now().month)
-                except:
-                    months = 12  # Default to 1 year
-                
-                success, msg, sources = self.calculate_goal_planning(goal_value, months)
-                return msg, msg, sources
-            else:
-                return ("Informe seu objetivo e prazo para calcular valor mensal. "
-                       "Qual meta deseja alcançar?"), "", ["perfil_investidor.json:metas"]
-        
-        # Spending queries
-        elif any(word in query_lower for word in ['gasto', 'gastei', 'despesa', 'quanto']):
-            success, msg, sources = self.get_spending_summary()
-            return msg, msg, sources
-        
-        # Alert queries
-        elif any(word in query_lower for word in ['alerta', 'aumento', 'aumentou']):
-            success, msg, sources = self.detect_spending_increase()
-            if success:
-                return msg, msg, sources
-            else:
-                # Try recurring expenses
-                success, msg, sources = self.detect_recurring_expenses()
-                if success:
-                    return msg, msg, sources
-                else:
-                    return "Sem alertas no momento. Seus gastos estão estáveis.", "", ["transacoes.csv"]
-        
-        # Investment/product queries
-        elif any(word in query_lower for word in ['investir', 'produto', 'aplicar', 'recomendar']):
-            success, msg, sources = self.suggest_product()
-            return msg, msg, sources
-        
-        # Greetings
-        elif any(word in query_lower for word in ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite']):
-            name = self.profile.get('nome', 'Cliente')
-            return (f"Olá, {name}. Estou aqui para ajudar com suas finanças. "
-                   "Como posso ajudar hoje?"), "", []
-        
-        # Default response
-        else:
-            return ("Posso ajudar com: gastos, alertas, metas ou produtos financeiros. "
-                   "Sobre qual tema deseja falar?"), "", []
+        structured = self.get_structured_response(query)
+        return (
+            structured['base_message'],
+            structured['detailed_response'],
+            structured['sources']
+        )

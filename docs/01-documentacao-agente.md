@@ -46,18 +46,19 @@ Pessoas com renda estabelecida que desejam melhorar sua gestão financeira mas n
 ```mermaid
 flowchart TD
     A[Usuário Mobile] -->|Mensagem texto| B[Interface Streamlit]
-    B --> C[Response Validator]
-    C --> D[Financial Agent]
-    D --> E[Data Loader]
-    E --> F[Data Files]
-    F -->|transacoes.csv| E
-    F -->|perfil_investidor.json| E
-    F -->|produtos_financeiros.json| E
-    F -->|historico_atendimento.csv| E
-    E --> D
-    D -->|Análise determinística| G[Resposta curta + Fontes]
-    G --> C
-    C -->|Valida 2 frases| B
+    B --> C[Financial Agent]
+    C --> D[Data Loader]
+    D --> E[Data Files]
+    E -->|transacoes.csv| D
+    E -->|perfil_investidor.json| D
+    E -->|produtos_financeiros.json| D
+    E -->|historico_atendimento.csv| D
+    D --> C
+    C -->|Análise determinística| F[Resposta Estruturada]
+    F -->|intent, data, base_message| G[LLM Adapter]
+    G -->|Verbalização em texto natural| H[Response Validator]
+    H -->|Valida 2 frases máx| I[Texto Final]
+    I --> B
     B -->|Bolha de chat| A
 ```
 
@@ -66,8 +67,9 @@ flowchart TD
 | Componente | Descrição | Tecnologia |
 |------------|-----------|------------|
 | Interface | Chat mobile-first com bolhas estilo WhatsApp | Streamlit |
-| Response Validator | Valida limite de 2 frases nas respostas | Python (regex) |
 | Financial Agent | Lógica determinística de análise financeira | Python |
+| LLM Adapter | Camada de NLG que verbaliza respostas estruturadas | OpenAI/Gemini/Claude (opcional) |
+| Response Validator | Valida limite de 2 frases nas respostas | Python (regex) |
 | Data Loader | Carrega e valida schema dos dados mockados | Pandas |
 | Data Files | Arquivos CSV/JSON com dados do usuário | Filesystem |
 
@@ -76,11 +78,28 @@ flowchart TD
 1. **Inicialização**: Data Loader carrega e valida arquivos em `/data`
 2. **Query do usuário**: Mensagem digitada na interface de chat
 3. **Processamento**: Agent analisa query e consulta dados relevantes
-4. **Análise**: Executa regras determinísticas (sem LLM externo)
-5. **Resposta**: Gera resposta curta com fonte dos dados
-6. **Validação**: Response Validator garante máximo 2 frases
-7. **Exibição**: Interface mostra resposta com justificativa e fontes
-8. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
+4. **Análise**: Executa regras determinísticas (cálculos, validações, alertas)
+5. **Estruturação**: Agent gera resposta estruturada com intent, dados calculados e mensagem base
+6. **Verbalização (NLG)**: LLM Adapter transforma dados estruturados em texto natural
+7. **Validação**: Response Validator garante máximo 2 frases
+8. **Exibição**: Interface mostra resposta com justificativa e fontes
+9. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
+
+### Uso de IA Generativa
+
+**Importante**: O projeto utiliza IA generativa (LLM) de forma **controlada e responsável**:
+
+- **LLM como camada de NLG**: O LLM atua APENAS como Natural Language Generation (NLG), transformando dados estruturados em texto natural
+- **Decisões são determinísticas**: Todos os cálculos financeiros, validações, alertas e recomendações são feitos por lógica determinística
+- **LLM não cria dados**: O LLM recebe dados já calculados e apenas os verbaliza. Não pode inventar valores, inferir informações ou fazer recomendações
+- **Fallback determinístico**: O sistema funciona perfeitamente sem LLM, usando mensagens pré-formatadas como fallback
+- **Governança**: System prompt do LLM é restritivo, proibindo criação de informações além das fornecidas
+
+Esta arquitetura garante:
+- ✅ Previsibilidade nas decisões financeiras
+- ✅ Zero alucinação de valores monetários
+- ✅ Transparência total (fontes sempre documentadas)
+- ✅ Funcionamento com ou sem API de LLM
 
 ---
 
@@ -93,8 +112,10 @@ flowchart TD
 - [x] Quando não há dados suficientes, admite limitação em 1 frase
 - [x] Não faz recomendações de investimento sem perfil do cliente
 - [x] **Validação automática** de tamanho de resposta (max 2 frases)
-- [x] Sem integração com APIs externas obrigatórias
-- [x] Lógica determinística (regras fixas, sem aleatoriedade)
+- [x] **LLM usado apenas como NLG**, não para decisões
+- [x] **System prompt restritivo** proíbe LLM de criar informações
+- [x] **Fallback determinístico** quando LLM não disponível
+- [x] Lógica determinística (regras fixas, sem aleatoriedade nas decisões)
 - [x] Não promete rentabilidade ou retornos
 - [x] Solicita confirmação antes de qualquer ação (mesmo simulada)
 

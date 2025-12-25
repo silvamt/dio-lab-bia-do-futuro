@@ -1,8 +1,53 @@
 # Prompts do Agente
 
-## System Prompt
+## Arquitetura de IA
 
-**Nota**: Este agente utiliza **lógica determinística** ao invés de LLM externo. As regras abaixo funcionam como "prompt interno" codificado no comportamento do agente.
+**Importante**: Este agente utiliza **IA generativa de forma controlada** em conjunto com **lógica determinística**:
+
+- **Decisões financeiras**: 100% determinísticas (cálculos, alertas, validações)
+- **Geração de linguagem**: LLM usado apenas para verbalizar dados estruturados (NLG)
+- **Governança**: System prompt restritivo impede LLM de criar informações
+
+---
+
+## System Prompt do LLM
+
+O LLM é usado APENAS como camada de Natural Language Generation (NLG). O prompt abaixo garante que ele não tome decisões nem crie dados:
+
+```
+Você é Bia, um agente financeiro que verbaliza informações estruturadas.
+
+REGRAS CRÍTICAS:
+1. Você APENAS transforma dados estruturados fornecidos em linguagem natural
+2. NUNCA invente, calcule ou infira valores não fornecidos
+3. NUNCA adicione informações além das fornecidas
+4. NUNCA faça recomendações além das fornecidas
+5. Use linguagem clara, profissional e objetiva
+6. Respostas devem ser CURTAS (máximo 2 frases concisas)
+7. Não use emojis
+8. Seja direto ao ponto, sem rodeios
+
+PROCESSO:
+- Você receberá dados estruturados com: intenção, valores calculados, e mensagem base
+- Sua tarefa é apenas verbalizar esses dados de forma natural e clara
+- Mantenha todos os números exatamente como fornecidos
+- Mantenha o tom consultivo e objetivo
+
+EXEMPLO:
+Entrada: {"intent": "spending_summary", "data": {"total": 2289.90, "category": "moradia", "category_total": 1380.00, "days": 30}}
+Saída: "Você gastou R$ 2.289,90 nos últimos 30 dias. Maior categoria: moradia (R$ 1.380,00)."
+
+Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeiras.
+```
+
+> [!IMPORTANT]
+> Este prompt é **crítico para segurança**. Ele garante que o LLM atue apenas como verbalizador, não como tomador de decisões financeiras.
+
+---
+
+## Regras de Comportamento do Agente
+
+**Nota**: As regras abaixo são implementadas como **lógica determinística** no código Python, não pelo LLM.
 
 ```
 IDENTIDADE:
@@ -182,7 +227,7 @@ Posso ajudar com: gastos, alertas, metas ou produtos financeiros. Sobre qual tem
 Resposta baseada nas regras gerais do agente.
 ```
 
-**Nota:** O agente não reconhece pedidos de informações sensíveis e redireciona para escopo financeiro.
+**Nota:** O agente não reconhece pedidos de informações sensíveis e redireciona para escopo financeiro. O LLM apenas verbaliza a resposta padrão determinística.
 
 ---
 
@@ -218,7 +263,7 @@ Análise baseada em perfil_investidor.json.
 Fontes: perfil_investidor.json:perfil_investidor,aceita_risco, produtos_financeiros.json:nome,risco,indicado_para
 ```
 
-**Nota:** O agente consulta automaticamente o perfil cadastrado.
+**Nota:** O agente consulta automaticamente o perfil cadastrado. LLM apenas verbaliza a recomendação já determinada.
 
 ---
 
@@ -247,15 +292,19 @@ Fontes completas:
 
 ### Ajustes Realizados
 
-1. **Limite de frases**: Implementado validador automático que conta frases usando regex e trunca se necessário. Garante consistência da experiência mobile.
+1. **Limite de frases**: Implementado validador automático que conta frases usando regex e trunca se necessário. Garante consistência da experiência mobile. **Valida também respostas do LLM**.
 
 2. **Fontes explícitas**: Cada função do agente retorna lista de fontes usadas. Aumenta transparência e confiabilidade.
 
 3. **Resposta padrão robusta**: Quando query não mapeia para nenhuma categoria conhecida, agente lista opções disponíveis ao invés de tentar adivinhar.
 
-4. **Cálculo determinístico**: Sem aleatoriedade. Mesma query com mesmos dados sempre gera mesma resposta. Essencial para confiabilidade financeira.
+4. **Cálculo determinístico**: Sem aleatoriedade. Mesma query com mesmos dados sempre gera mesma estrutura de resposta. Essencial para confiabilidade financeira.
 
 5. **Validação de dados na inicialização**: Erros de schema são capturados antes da primeira interação, não durante o uso.
+
+6. **LLM como NLG**: IA generativa usada exclusivamente para verbalização de dados estruturados. System prompt restritivo impede criação de informações.
+
+7. **Fallback determinístico**: Sistema funciona sem LLM, usando mensagens pré-formatadas quando API não disponível.
 
 ### Melhorias Futuras
 
@@ -264,3 +313,5 @@ Fontes completas:
 - Permitir configuração do período de análise pelo usuário
 - Integrar histórico_atendimento.csv para contexto de conversas anteriores
 - Adicionar análise de padrões mensais (sazonalidade)
+- Testar diferentes modelos de LLM (GPT-4, Claude, Gemini) para melhor verbalização
+- Adicionar métricas de qualidade da verbalização do LLM
