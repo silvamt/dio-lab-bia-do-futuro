@@ -171,9 +171,13 @@ def process_user_input(user_input: str):
         # Defensive unpacking to handle edge cases
         result = st.session_state.agent.answer_query(user_input)
         if isinstance(result, tuple) and len(result) >= 2:
-            response, sources = result[0], result[1]
+            response, sources, *_ = result
         else:
-            response, sources = str(result), []
+            # Unexpected result format - log warning and provide fallback
+            import logging
+            logging.warning(f"Unexpected result format from answer_query: {type(result)}")
+            response = str(result) if result else "Erro ao processar sua pergunta."
+            sources = []
         
         # Validate response length (max 10 sentences for mobile-friendly display)
         is_valid, adjusted_response = ResponseValidator.validate_response(response, allow_detailed=False)
