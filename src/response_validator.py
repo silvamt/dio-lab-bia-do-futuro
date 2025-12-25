@@ -27,8 +27,12 @@ class ResponseValidator:
         if not text or not text.strip():
             return 0
         
-        # Split by sentence-ending punctuation
-        sentences = re.split(r'[.!?]+', text.strip())
+        # Remove decimal numbers to avoid counting them as sentences
+        # Replace patterns like "R$ 123.45" or "123.45%" with placeholders
+        text_clean = re.sub(r'\d+\.\d+', 'NUM', text)
+        
+        # Split by sentence-ending punctuation followed by space or end of string
+        sentences = re.split(r'[.!?]+\s+|[.!?]+$', text_clean.strip())
         # Filter out empty strings
         sentences = [s for s in sentences if s.strip()]
         
@@ -57,25 +61,41 @@ class ResponseValidator:
             return True, response
         
         # Response is too long, truncate to max sentences
-        sentences = re.split(r'([.!?]+)', response.strip())
+        # Use same logic as count_sentences to properly identify sentence boundaries
+        text_clean = re.sub(r'\d+\.\d+', 'NUM', response.strip())
         
-        # Reconstruct up to max_sentences
+        # Find sentence boundaries in cleaned text
+        sentences_clean = re.split(r'([.!?]+\s+|[.!?]+$)', text_clean)
+        
+        # Build result from original text using cleaned boundaries
         result = []
         sentence_counter = 0
+        pos = 0
+        original = response.strip()
         
-        for i in range(0, len(sentences), 2):
+        for i in range(0, len(sentences_clean), 2):
             if sentence_counter >= max_sentences:
                 break
             
-            sentence = sentences[i].strip()
-            if sentence:
-                result.append(sentence)
-                # Add punctuation if available
-                if i + 1 < len(sentences):
-                    result.append(sentences[i + 1])
-                sentence_counter += 1
+            sentence_clean = sentences_clean[i].strip()
+            if sentence_clean:
+                # Find next sentence-ending punctuation in original text
+                next_punct = -1
+                for punct in ['.', '!', '?']:
+                    idx = original.find(punct, pos)
+                    if idx != -1 and (next_punct == -1 or idx < next_punct):
+                        next_punct = idx
+                
+                if next_punct != -1:
+                    # Include text up to and including punctuation
+                    result.append(original[pos:next_punct+1])
+                    pos = next_punct + 1
+                    # Skip trailing spaces
+                    while pos < len(original) and original[pos] == ' ':
+                        pos += 1
+                    sentence_counter += 1
         
-        adjusted = ''.join(result).strip()
+        adjusted = ' '.join(result).strip()
         
         return False, adjusted
     
