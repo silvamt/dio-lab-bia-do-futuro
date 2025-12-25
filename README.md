@@ -2,12 +2,13 @@
 
 ## Contexto
 
-**Bia** é um agente financeiro inteligente e proativo que ajuda você a gerenciar suas finanças de forma simples e eficiente. Com interface mobile-first inspirada no WhatsApp, Bia oferece:
+**Bia** é um agente financeiro inteligente e proativo que ajuda você a gerenciar suas finanças de forma simples e eficiente. Com interface mobile-first inspirada no WhatsApp e uso responsável de IA generativa, Bia oferece:
 
 - 📊 **Análise proativa de gastos** - Detecta aumentos atípicos automaticamente
 - 🔔 **Alertas inteligentes** - Identifica recorrências e oportunidades de economia
 - 🎯 **Planejamento de metas** - Calcula valores mensais para seus objetivos
 - 💼 **Sugestões personalizadas** - Produtos adequados ao seu perfil de investidor
+- 🤖 **IA Responsável** - LLM usado apenas para linguagem natural, decisões são determinísticas
 - 🔒 **Segurança garantida** - Sem alucinações, apenas dados reais
 
 ## 🚀 Como Executar
@@ -28,9 +29,20 @@ pip install -r requirements.txt
 ```bash
 # Execute o aplicativo
 streamlit run src/app.py
+
+# Opcional: Configure chave de API para LLM (OpenAI, Gemini ou Claude)
+# O sistema funciona sem chave, usando fallback determinístico
+export OPENAI_API_KEY="sua-chave-aqui"
+# ou
+export GEMINI_API_KEY="sua-chave-aqui"
+# ou
+export ANTHROPIC_API_KEY="sua-chave-aqui"
 ```
 
 O aplicativo será aberto automaticamente no navegador em `http://localhost:8501`
+
+> [!NOTE]
+> A aplicação funciona perfeitamente **sem chaves de API**. O LLM é usado apenas para verbalização de respostas estruturadas. Sem chave, o sistema usa mensagens pré-formatadas determinísticas.
 
 ## 💬 Exemplos de Uso
 
@@ -70,6 +82,8 @@ Experimente perguntar à Bia:
 - **Validação automática**: Sistema verifica tamanho das respostas
 - **Transparência**: Fontes sempre documentadas
 - **Sem operações reais**: Apenas simulações e análises
+- **IA Responsável**: LLM usado apenas como camada de linguagem (NLG)
+- **Decisões determinísticas**: Cálculos e recomendações não dependem de IA
 
 ---
 
@@ -122,6 +136,7 @@ Os seguintes arquivos estão em [`data/`](./data/):
 └── 📁 src/                            # Código da aplicação
     ├── app.py                         # Aplicação Streamlit (main)
     ├── agent.py                       # Lógica do agente financeiro
+    ├── llm_adapter.py                 # Adaptador LLM (NLG)
     ├── data_loader.py                 # Carregamento e validação de dados
     └── response_validator.py          # Validação de respostas (UX)
 ```
@@ -135,6 +150,9 @@ Os seguintes arquivos estão em [`data/`](./data/):
 - ✅ Validação automática do tamanho das respostas (max 2 frases)
 - ✅ Fontes sempre documentadas e visíveis ao usuário
 - ✅ Quando não há dados, o agente admite a limitação
+- ✅ **LLM usado apenas como NLG**, não para decisões
+- ✅ **System prompt restritivo** proíbe criação de informações
+- ✅ **Fallback determinístico** quando LLM indisponível
 
 ### O Que Bia NÃO Faz
 - ❌ Não promete rentabilidade ou retornos financeiros
@@ -150,6 +168,18 @@ Os seguintes arquivos estão em [`data/`](./data/):
 - **Streamlit** - Interface web interativa
 - **Pandas** - Manipulação de dados
 - **Python 3.8+** - Linguagem de programação
+- **OpenAI/Gemini/Claude** - LLM para NLG (opcional)
+
+## 🤖 Uso de IA Generativa
+
+Este projeto demonstra **uso responsável de IA generativa**:
+
+- **Decisões financeiras**: 100% determinísticas (cálculos, validações, alertas)
+- **Geração de linguagem**: LLM usado apenas para verbalizar dados estruturados
+- **Governança**: System prompt restritivo impede criação de informações
+- **Fallback**: Sistema funciona sem LLM, usando mensagens pré-formatadas
+
+Esta arquitetura garante **zero alucinação de valores** enquanto mantém **naturalidade na comunicação**.
 
 ---
 

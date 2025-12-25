@@ -31,13 +31,15 @@
 
 2. **Mobile-first**: Interface inspirada no WhatsApp com respostas curtas (máximo 2 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
 
-3. **100% confiável**: Zero alucinação - todas as respostas baseadas exclusivamente nos seus dados reais. Sem inventar informações, sem prometer retornos milagrosos
+3. **100% confiável**: Zero alucinação - todas as decisões financeiras são determinísticas. IA generativa usada apenas para verbalizar dados já calculados
 
 4. **Transparente**: Cada resposta mostra a fonte dos dados. Você sabe exatamente de onde vem a informação
 
+5. **Governança de IA**: LLM usado de forma responsável, apenas como camada de linguagem, sem acesso direto aos dados ou poder de decisão
+
 **Como funciona:**
 
-"Bia analisa suas transações automaticamente usando regras determinísticas. Sem IA black-box, sem surpresas. Dados ficam com você, processamento é local."
+"Bia analisa suas transações automaticamente usando regras determinísticas para cálculos e decisões. A IA generativa entra apenas para transformar os dados estruturados em linguagem natural. Sem IA black-box para decisões financeiras, sem surpresas. Dados ficam com você, processamento é local."
 
 ---
 
@@ -73,14 +75,15 @@ Bia: "Com perfil moderado, considere 'Tesouro Selic'.
 
 **Por que é inovador:**
 
-"Enquanto outros assistentes financeiros dependem de LLMs que podem alucinar valores e dar conselhos errados, Bia é **determinística por design**. No setor financeiro, confiabilidade vale mais que criatividade."
+"Enquanto outros assistentes financeiros dependem 100% de LLMs que podem alucinar valores e dar conselhos errados, Bia usa **IA híbrida inteligente**: decisões financeiras são determinísticas, IA generativa apenas verbaliza. É o melhor dos dois mundos - **confiabilidade nas decisões** e **naturalidade na comunicação**."
 
 **Impacto:**
 
 - **Inclusão financeira**: Interface simples torna gestão financeira acessível a todos
 - **Educação financeira**: Respostas curtas com justificativas ensinam enquanto informam
 - **Empoderamento**: Usuário toma decisões informadas, não segue ordens cegas
-- **Privacidade**: Dados ficam locais, sem envio para APIs externas
+- **Privacidade**: Dados ficam locais, LLM recebe apenas dados estruturados para verbalização
+- **Responsabilidade em IA**: Demonstra uso consciente de LLM com governança apropriada
 
 **Visão de futuro:**
 
@@ -117,11 +120,12 @@ Bia: "Com perfil moderado, considere 'Tesouro Selic'.
 
 ### Slide 4: Diferencial
 - Tabela comparativa:
-  - Outros: LLM → pode alucinar
-  - Bia: Determinístico → sempre preciso
+  - Outros: 100% LLM → pode alucinar valores
+  - Bia: IA Híbrida → decisões determinísticas + verbalização natural
+  - Destaque: "Melhor dos dois mundos"
 
 ### Slide 5: Impacto
-- Ícones: Inclusão | Educação | Empoderamento | Privacidade
+- Ícones: Inclusão | Educação | Empoderamento | Privacidade | IA Responsável
 
 ---
 
@@ -159,17 +163,17 @@ Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclus
 
 "Deixa eu mostrar. [abrir app]
 
-Pergunto: 'Tenho algum alerta?' e Bia responde: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
+Pergunto: 'Tenho algum alerta?' e Bia analisa meus dados com lógica determinística, detecta que os gastos aumentaram 35%, e usa IA generativa apenas para verbalizar: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
 
-Agora: 'Como posso atingir minha meta?' e ela calcula: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
+Agora: 'Como posso atingir minha meta?' e ela calcula deterministicamente: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' O LLM só transforma os números em texto natural. E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
 
 E olha aqui embaixo - mostra as fontes dos dados. Total transparência."
 
 **[2:30 - 3:00] Diferencial e Encerramento**
 
-"Qual a grande sacada? Enquanto outros assistentes financeiros usam IA que pode alucinar valores errados, Bia é determinística por design. No setor financeiro, confiabilidade vale mais que criatividade.
+"Qual a grande sacada? Bia usa **IA híbrida inteligente**. Decisões financeiras são 100% determinísticas - sem alucinação de valores. IA generativa entra apenas para verbalizar em linguagem natural. É o melhor dos dois mundos: **confiabilidade nas decisões, naturalidade na comunicação**.
 
-O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
+O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados, IA responsável. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
 
 O código está no GitHub. Quer testar? [mostrar QR code]"
 
@@ -194,8 +198,8 @@ O código está no GitHub. Quer testar? [mostrar QR code]"
 
 ## Perguntas Frequentes (Q&A)
 
-**Q: Por que não usar um LLM como GPT?**
-A: No setor financeiro, precisão é mais importante que flexibilidade. LLMs podem alucinar valores e dar conselhos errados. Nossa abordagem determinística garante 100% de precisão com os dados disponíveis.
+**Q: Por que não usar um LLM como GPT para tudo?**
+A: No setor financeiro, precisão é mais importante que flexibilidade. LLMs podem alucinar valores e dar conselhos errados. Nossa abordagem híbrida usa decisões determinísticas (100% precisas) e LLM apenas para verbalização natural. Melhor dos dois mundos.
 
 **Q: Funciona com banco real?**
 A: Esta é uma versão de demonstração com dados mockados. A arquitetura está preparada para integração - basta substituir DataLoader por conexão com API bancária.
@@ -207,4 +211,4 @@ A: Processamento 100% local. Dados não são enviados para APIs externas. Em pro
 A: Cada resposta tem botão "Ver detalhes" que expande até 6 frases com dados completos. Mantemos a resposta principal curta para mobile, mas quem quer detalhes pode acessar.
 
 **Q: Quanto custa rodar?**
-A: Sem uso de APIs pagas de LLM, o custo é apenas hospedagem básica. Muito mais econômico que soluções baseadas em GPT-4.
+A: Sem uso intensivo de LLM (apenas para NLG), o custo é muito menor que soluções 100% baseadas em GPT-4. Funciona até sem LLM em modo determinístico puro.
