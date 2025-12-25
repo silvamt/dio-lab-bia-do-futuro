@@ -6,7 +6,7 @@
 O gerenciamento financeiro pessoal pode ser complexo e demorado. Muitas pessoas não percebem padrões de gastos problemáticos, perdem oportunidades de economia e têm dificuldade em planejar metas financeiras de forma realista. Além disso, a linguagem técnica do setor financeiro pode ser intimidadora e interfaces complexas afastam usuários.
 
 ### Solução
-Bia é um agente financeiro proativo que monitora automaticamente os gastos do usuário, identifica padrões e oportunidades de melhoria, e oferece orientação personalizada de forma simples e direta. Com uma interface mobile-first inspirada no WhatsApp, Bia torna a gestão financeira acessível e conveniente, com respostas curtas (máximo 2 frases) adequadas para consulta rápida no celular.
+Moara (MOARA – Modular Orchestrated AI for Responsible Advisory) é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Moara monitora automaticamente os gastos do usuário, identifica padrões e oportunidades de melhoria, e oferece orientação personalizada de forma simples e direta. Com uma interface mobile-first inspirada no WhatsApp, Moara torna a gestão financeira acessível e conveniente, com respostas curtas (máximo 2 frases) adequadas para consulta rápida no celular.
 
 ### Público-Alvo
 Pessoas com renda estabelecida que desejam melhorar sua gestão financeira mas não têm tempo ou conhecimento técnico aprofundado. Especialmente usuários mobile que preferem interações rápidas e diretas, similares a apps de mensagem.
@@ -16,7 +16,7 @@ Pessoas com renda estabelecida que desejam melhorar sua gestão financeira mas n
 ## Persona e Tom de Voz
 
 ### Nome do Agente
-**Bia** (diminutivo de "Bem-vinda", simbolizando acolhimento financeiro)
+**Moara** (MOARA – Modular Orchestrated AI for Responsible Advisory)
 
 ### Personalidade
 - **Consultiva**: Oferece orientação baseada em dados, não ordens
@@ -131,7 +131,7 @@ Este mecanismo garante experiência mobile-first consistente.
 
 ### Limitações Declaradas
 
-#### O que Bia NÃO faz:
+#### O que Moara NÃO faz:
 - ❌ Não executa operações financeiras reais
 - ❌ Não acessa contas bancárias ou cartões
 - ❌ Não promete rentabilidade específica de investimentos
@@ -140,7 +140,7 @@ Este mecanismo garante experiência mobile-first consistente.
 - ❌ Não inventa dados quando não estão disponíveis
 - ❌ Não recomenda produtos sem considerar perfil do investidor
 
-#### Quando Bia não pode responder:
+#### Quando Moara não pode responder:
 - Dados insuficientes em `/data` para a análise solicitada
 - Query fora do escopo financeiro definido
 - Informações sobre produtos não presentes em `produtos_financeiros.json`

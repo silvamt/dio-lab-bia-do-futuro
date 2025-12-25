@@ -2,7 +2,7 @@
 
 ## Como Avaliar o Agente
 
-A avaliação de Bia combina duas abordagens:
+A avaliação de Moara combina duas abordagens:
 
 1. **Testes estruturados**: Cenários predefinidos com respostas esperadas
 2. **Validação automática**: Mecanismos de código que garantem conformidade
@@ -177,4 +177,4 @@ Para evolução do projeto:
 
 ## Conclusão
 
-O agente Bia atende plenamente aos critérios de segurança, brevidade e transparência definidos. A arquitetura determinística elimina alucinações, e os validadores automáticos garantem experiência mobile-first consistente. As métricas automáticas facilitam manutenção e evolução do sistema.
+O agente Moara atende plenamente aos critérios de segurança, brevidade e transparência definidos. A arquitetura determinística elimina alucinações, e os validadores automáticos garantem experiência mobile-first consistente. As métricas automáticas facilitam manutenção e evolução do sistema.
