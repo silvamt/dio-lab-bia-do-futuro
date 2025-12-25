@@ -67,6 +67,10 @@ Saída: "Você gastou R$ 2.289,90 nos últimos 30 dias. Maior categoria: moradia
 
 Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeiras."""
 
+    # Model version constants
+    OPENAI_MODEL = "gpt-3.5-turbo"
+    CLAUDE_MODEL = "claude-3-haiku-20240307"
+
     def __init__(self, provider: Optional[str] = None):
         """
         Initialize LLM adapter.
@@ -195,7 +199,7 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
         prompt = self._build_prompt(structured_data)
         
         response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=self.OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": self.SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -228,9 +232,6 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
             return self._mock_generate(structured_data)
         
         return response.text.strip()
-    
-    # Claude model version constant
-    CLAUDE_MODEL = "claude-3-haiku-20240307"
     
     def _generate_claude(self, structured_data: Dict) -> str:
         """Generate response using Claude."""
@@ -370,7 +371,7 @@ Agora classifique a mensagem do usuário."""
     def _classify_intent_openai(self, user_message: str) -> str:
         """Classify intent using OpenAI."""
         response = self.client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model=self.OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": self.INTENT_CLASSIFICATION_PROMPT},
                 {"role": "user", "content": user_message}

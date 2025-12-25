@@ -4,8 +4,11 @@ Implements deterministic rules for alerts and financial planning.
 """
 
 import pandas as pd
+import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
+
+logger = logging.getLogger(__name__)
 
 
 class FinancialAgent:
@@ -457,10 +460,12 @@ class FinancialAgent:
                         response = self._route_by_intent(intent, query)
                         if response is not None:
                             return response
+                    else:
+                        logger.debug(f"LLM confidence too low ({confidence:.2f}), using keyword matching")
                     # If confidence is low or routing failed, fall through to keyword matching
             except Exception as e:
-                # If anything fails with LLM classification, fall through to keyword matching
-                pass
+                # If anything fails with LLM classification, log and fall through to keyword matching
+                logger.warning(f"LLM intent classification failed: {e}, using keyword matching fallback")
         
         # Fall back to deterministic keyword-based routing
         query_lower = query.lower().strip()
