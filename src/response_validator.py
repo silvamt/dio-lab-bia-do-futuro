@@ -10,8 +10,8 @@ from typing import Tuple
 class ResponseValidator:
     """Validates and adjusts agent responses for mobile UX."""
     
-    MAX_SENTENCES_DEFAULT = 2
-    MAX_SENTENCES_DETAILED = 6
+    # Maximum sentences allowed in response (represents 2-3 short paragraphs)
+    MAX_TOTAL_SENTENCES = 10
     
     @staticmethod
     def count_sentences(text: str) -> int:
@@ -43,9 +43,11 @@ class ResponseValidator:
         """
         Validate that response meets length requirements.
         
+        For Moara, we allow up to 10 sentences (equivalent to 2-3 short paragraphs).
+        
         Args:
             response: Response text to validate
-            allow_detailed: If True, allows up to 6 sentences (detailed mode)
+            allow_detailed: Not used, kept for backward compatibility
             
         Returns:
             Tuple of (is_valid, adjusted_response)
@@ -53,9 +55,11 @@ class ResponseValidator:
         if not response or not response.strip():
             return True, response
         
+        # Count sentences - this is the primary constraint
         sentence_count = ResponseValidator.count_sentences(response)
-        max_sentences = (ResponseValidator.MAX_SENTENCES_DETAILED if allow_detailed 
-                        else ResponseValidator.MAX_SENTENCES_DEFAULT)
+        
+        # For Moara, we allow up to 10 sentences (2-3 short paragraphs)
+        max_sentences = ResponseValidator.MAX_TOTAL_SENTENCES
         
         if sentence_count <= max_sentences:
             return True, response
