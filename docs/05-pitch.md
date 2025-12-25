@@ -1,44 +1,210 @@
-# Pitch (3 minutos)
+# Pitch - Bia, Agente Financeiro Proativo (3 minutos)
 
 > [!TIP]
-> Você pode usar alguns slides pra apoiar no seu Pitch e mostrar sua solução na prática.
+> Este roteiro está estruturado para apresentação de 3 minutos com demonstração prática.
  
-## Roteiro Sugerido
+## Roteiro
 
-### 1. O Problema (30 seg)
-> Qual dor do cliente você resolve?
+### 1. O Problema (30 segundos)
 
-[Sua descrição aqui]
+**Dor do cliente:**
 
-### 2. A Solução (1 min)
-> Como seu agente resolve esse problema?
+"70% dos brasileiros não têm controle adequado das suas finanças pessoais. Aplicativos bancários são reativos - mostram o extrato, mas não ajudam você a entender o que está acontecendo. Você só percebe que gastou demais quando o dinheiro já acabou."
 
-[Sua descrição aqui]
+**Consequências:**
+- Falta de visibilidade sobre padrões de gastos
+- Oportunidades de economia perdidas
+- Metas financeiras não planejadas adequadamente
+- Interfaces complexas que intimidam
 
-### 3. Demonstração (1 min)
-> Mostre o agente funcionando (pode ser gravação de tela)
+---
 
-[Descreva o que será mostrado]
+### 2. A Solução (1 minuto)
 
-### 4. Diferencial e Impacto (30 seg)
-> Por que essa solução é inovadora e qual é o impacto dela na sociedade?
+**Apresentação:**
 
-[Sua descrição aqui]
+"Apresento Bia - seu agente financeiro proativo que monitora seus gastos automaticamente e te alerta antes que vire problema."
+
+**Diferenciais:**
+
+1. **Proativa, não reativa**: Detecta aumento atípico de gastos, identifica recorrências e sugere oportunidades de economia
+
+2. **Mobile-first**: Interface inspirada no WhatsApp com respostas curtas (máximo 2 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
+
+3. **100% confiável**: Zero alucinação - todas as respostas baseadas exclusivamente nos seus dados reais. Sem inventar informações, sem prometer retornos milagrosos
+
+4. **Transparente**: Cada resposta mostra a fonte dos dados. Você sabe exatamente de onde vem a informação
+
+**Como funciona:**
+
+"Bia analisa suas transações automaticamente usando regras determinísticas. Sem IA black-box, sem surpresas. Dados ficam com você, processamento é local."
+
+---
+
+### 3. Demonstração (1 minuto)
+
+**Cenário 1: Alerta Proativo**
+```
+Usuário: "Tenho algum alerta?"
+Bia: "Seus gastos aumentaram 35% nos últimos 7 dias. 
+      Pode ser um bom momento para revisar o orçamento."
+```
+👉 Mostrar justificativa e fontes na interface
+
+**Cenário 2: Planejamento de Meta**
+```
+Usuário: "Como posso atingir minha meta?"
+Bia: "Para atingir R$ 15.000 em 8 meses, reserve R$ 1.875 mensais. 
+      Isso representa 37,5% da sua renda (moderado)."
+```
+👉 Mostrar botão "Ver detalhes" com informações estendidas
+
+**Cenário 3: Sugestão Personalizada**
+```
+Usuário: "Que produto você recomenda?"
+Bia: "Com perfil moderado, considere 'Tesouro Selic'. 
+      Indicado para reserva de emergência e iniciantes."
+```
+👉 Destacar compatibilidade automática com perfil
+
+---
+
+### 4. Diferencial e Impacto (30 segundos)
+
+**Por que é inovador:**
+
+"Enquanto outros assistentes financeiros dependem de LLMs que podem alucinar valores e dar conselhos errados, Bia é **determinística por design**. No setor financeiro, confiabilidade vale mais que criatividade."
+
+**Impacto:**
+
+- **Inclusão financeira**: Interface simples torna gestão financeira acessível a todos
+- **Educação financeira**: Respostas curtas com justificativas ensinam enquanto informam
+- **Empoderamento**: Usuário toma decisões informadas, não segue ordens cegas
+- **Privacidade**: Dados ficam locais, sem envio para APIs externas
+
+**Visão de futuro:**
+
+"Bia é o primeiro passo para democratizar consultoria financeira de qualidade. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real."
 
 ---
 
 ## Checklist do Pitch
 
-- [ ] Duração máxima de 3 minutos
-- [ ] Problema claramente definido
-- [ ] Solução demonstrada na prática
-- [ ] Diferencial explicado
-- [ ] Áudio e vídeo com boa qualidade
+- [x] Duração máxima de 3 minutos
+- [x] Problema claramente definido (controle financeiro inadequado)
+- [x] Solução demonstrada na prática (3 cenários de uso)
+- [x] Diferencial explicado (determinístico vs LLM, zero alucinação)
+- [x] Impacto social descrito (inclusão, educação, empoderamento)
+
+---
+
+## Recursos Visuais Sugeridos
+
+### Slide 1: Problema
+- Estatística sobre brasileiros sem controle financeiro
+- Imagem: Pessoa confusa olhando extrato bancário
+
+### Slide 2: Solução - Arquitetura
+- Diagrama simples: Dados → Análise → Resposta Curta
+- Destacar "100% baseado em dados reais"
+
+### Slide 3: Demonstração
+- Screenshots da interface mostrando:
+  - Bolhas de chat estilo WhatsApp
+  - Resposta curta com justificativa
+  - Botão "Ver detalhes"
+  - Seção de fontes
+
+### Slide 4: Diferencial
+- Tabela comparativa:
+  - Outros: LLM → pode alucinar
+  - Bia: Determinístico → sempre preciso
+
+### Slide 5: Impacto
+- Ícones: Inclusão | Educação | Empoderamento | Privacidade
+
+---
+
+## Dicas de Apresentação
+
+1. **Comece com pergunta**: "Quem aqui sabe exatamente quanto gastou semana passada?"
+2. **Use dados reais**: Mostre o valor específico do aumento de gastos detectado
+3. **Demonstração ao vivo**: Se possível, execute o app durante o pitch
+4. **Enfatize segurança**: No setor financeiro, confiabilidade é crítica
+5. **Termine com call-to-action**: "Quer testar? Código está no GitHub."
+
+---
+
+## Script Detalhado (Opcional)
+
+**[0:00 - 0:30] Abertura + Problema**
+
+"Oi, meu nome é [seu nome]. Quantos de vocês sabem exatamente quanto gastaram na última semana? [pausa]
+
+Pois é. 70% dos brasileiros não têm controle adequado das suas finanças. E não é por falta de app - seu banco já tem um aplicativo. O problema é que ele é reativo: mostra o extrato, mas não te ajuda a entender o que está acontecendo. Você só percebe que gastou demais quando o dinheiro já acabou."
+
+**[0:30 - 1:30] Solução**
+
+"Apresento Bia - seu agente financeiro proativo. Bia monitora seus gastos automaticamente e te alerta ANTES que vire problema.
+
+Tem três diferenciais principais:
+
+Primeiro: é proativa. Detecta quando seus gastos aumentam 35% em uma semana e te avisa para você agir.
+
+Segundo: mobile-first. Respostas curtas, máximo 2 frases, como se fosse WhatsApp. Nada de paragrafos intermináveis.
+
+Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclusivamente nos seus dados reais. E cada resposta mostra a fonte - você sabe de onde vem a informação."
+
+**[1:30 - 2:30] Demonstração**
+
+"Deixa eu mostrar. [abrir app]
+
+Pergunto: 'Tenho algum alerta?' e Bia responde: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
+
+Agora: 'Como posso atingir minha meta?' e ela calcula: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
+
+E olha aqui embaixo - mostra as fontes dos dados. Total transparência."
+
+**[2:30 - 3:00] Diferencial e Encerramento**
+
+"Qual a grande sacada? Enquanto outros assistentes financeiros usam IA que pode alucinar valores errados, Bia é determinística por design. No setor financeiro, confiabilidade vale mais que criatividade.
+
+O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
+
+O código está no GitHub. Quer testar? [mostrar QR code]"
 
 ---
 
 ## Link do Vídeo
 
-> Cole aqui o link do seu pitch (YouTube, Loom, Google Drive, etc.)
+> [Espaço reservado para link do pitch gravado]
+> 
+> Sugestões de plataforma:
+> - YouTube (público ou não listado)
+> - Loom (grátis até 5min)
+> - Google Drive (com permissão de visualização)
 
-[Link do vídeo]
+**Formato recomendado:**
+- Resolução: 1080p mínimo
+- Áudio: Microfone dedicado ou fone com mic
+- Tela: Compartilhamento de tela para demonstração
+- Enquadramento: Se aparecer, câmera em 720p no canto
+
+---
+
+## Perguntas Frequentes (Q&A)
+
+**Q: Por que não usar um LLM como GPT?**
+A: No setor financeiro, precisão é mais importante que flexibilidade. LLMs podem alucinar valores e dar conselhos errados. Nossa abordagem determinística garante 100% de precisão com os dados disponíveis.
+
+**Q: Funciona com banco real?**
+A: Esta é uma versão de demonstração com dados mockados. A arquitetura está preparada para integração - basta substituir DataLoader por conexão com API bancária.
+
+**Q: Como garante privacidade?**
+A: Processamento 100% local. Dados não são enviados para APIs externas. Em produção, seria possível adicionar criptografia ponta-a-ponta.
+
+**Q: E se eu quiser respostas mais longas?**
+A: Cada resposta tem botão "Ver detalhes" que expande até 6 frases com dados completos. Mantemos a resposta principal curta para mobile, mas quem quer detalhes pode acessar.
+
+**Q: Quanto custa rodar?**
+A: Sem uso de APIs pagas de LLM, o custo é apenas hospedagem básica. Muito mais econômico que soluções baseadas em GPT-4.

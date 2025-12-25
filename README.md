@@ -1,149 +1,158 @@
-# 🤖 Agente Financeiro Inteligente com IA Generativa
+# 🤖 Bia - Agente Financeiro Proativo
 
 ## Contexto
 
-Os assistentes virtuais no setor financeiro estão evoluindo de simples chatbots reativos para **agentes inteligentes e proativos**. Neste desafio, você vai idealizar e prototipar um agente financeiro que utiliza IA Generativa para:
+**Bia** é um agente financeiro inteligente e proativo que ajuda você a gerenciar suas finanças de forma simples e eficiente. Com interface mobile-first inspirada no WhatsApp, Bia oferece:
 
-- **Antecipar necessidades** ao invés de apenas responder perguntas
-- **Personalizar** sugestões com base no contexto de cada cliente
-- **Cocriar soluções** financeiras de forma consultiva
-- **Garantir segurança** e confiabilidade nas respostas (anti-alucinação)
+- 📊 **Análise proativa de gastos** - Detecta aumentos atípicos automaticamente
+- 🔔 **Alertas inteligentes** - Identifica recorrências e oportunidades de economia
+- 🎯 **Planejamento de metas** - Calcula valores mensais para seus objetivos
+- 💼 **Sugestões personalizadas** - Produtos adequados ao seu perfil de investidor
+- 🔒 **Segurança garantida** - Sem alucinações, apenas dados reais
+
+## 🚀 Como Executar
+
+### Instalação
+
+```bash
+# Clone o repositório
+git clone https://github.com/silvamt/dio-lab-bia-do-futuro.git
+cd dio-lab-bia-do-futuro
+
+# Instale as dependências
+pip install -r requirements.txt
+```
+
+### Execução
+
+```bash
+# Execute o aplicativo
+streamlit run src/app.py
+```
+
+O aplicativo será aberto automaticamente no navegador em `http://localhost:8501`
+
+## 💬 Exemplos de Uso
+
+Experimente perguntar à Bia:
+
+- "Quanto gastei este mês?"
+- "Tenho algum alerta?"
+- "Como posso atingir minha meta?"
+- "Que produto você recomenda?"
+- "Olá!"
 
 > [!TIP]
 > Na pasta [`examples/`](./examples/) você encontra referências de implementação para cada etapa deste desafio.
 
 ---
 
-## O Que Você Deve Entregar
+## 📋 Funcionalidades
 
-### 1. Documentação do Agente
+### Alertas Proativos
+- **Detecção de aumento de gastos**: Compara últimos 7 dias com período anterior
+- **Identificação de recorrências**: Encontra despesas que se repetem
+- **Oportunidades de economia**: Sugere onde é possível reduzir gastos
 
-Defina **o que** seu agente faz e **como** ele funciona:
+### Planejamento Financeiro
+- **Cálculo de metas**: Define valor mensal para atingir objetivos
+- **Análise de viabilidade**: Considera sua renda e perfil
+- **Sugestões personalizadas**: Produtos adequados ao seu perfil
 
-- **Caso de Uso:** Qual problema financeiro ele resolve? (ex: consultoria de investimentos, planejamento de metas, alertas de gastos)
-- **Persona e Tom de Voz:** Como o agente se comporta e se comunica?
-- **Arquitetura:** Fluxo de dados e integração com a base de conhecimento
-- **Segurança:** Como evitar alucinações e garantir respostas confiáveis?
+### UX Mobile-First
+- **Respostas curtas**: Máximo 2 frases na resposta principal
+- **Interface WhatsApp**: Bolhas de chat e entrada fixada no rodapé
+- **Detalhes sob demanda**: Botão "Ver detalhes" para informações estendidas
+- **Justificativas transparentes**: Cada resposta indica a fonte dos dados
 
-📄 **Template:** [`docs/01-documentacao-agente.md`](./docs/01-documentacao-agente.md)
-
----
-
-### 2. Base de Conhecimento
-
-Utilize os **dados mockados** disponíveis na pasta [`data/`](./data/) para alimentar seu agente:
-
-| Arquivo | Formato | Descrição |
-|---------|---------|-----------|
-| `transacoes.csv` | CSV | Histórico de transações do cliente |
-| `historico_atendimento.csv` | CSV | Histórico de atendimentos anteriores |
-| `perfil_investidor.json` | JSON | Perfil e preferências do cliente |
-| `produtos_financeiros.json` | JSON | Produtos e serviços disponíveis |
-
-Você pode adaptar ou expandir esses dados conforme seu caso de uso.
-
-📄 **Template:** [`docs/02-base-conhecimento.md`](./docs/02-base-conhecimento.md)
+### Segurança
+- **Sem alucinações**: Respostas baseadas apenas nos dados em `/data`
+- **Validação automática**: Sistema verifica tamanho das respostas
+- **Transparência**: Fontes sempre documentadas
+- **Sem operações reais**: Apenas simulações e análises
 
 ---
 
-### 3. Prompts do Agente
+## 📚 Documentação
 
-Documente os prompts que definem o comportamento do seu agente:
+Toda a documentação está em [`docs/`](./docs/):
 
-- **System Prompt:** Instruções gerais de comportamento e restrições
-- **Exemplos de Interação:** Cenários de uso com entrada e saída esperada
-- **Tratamento de Edge Cases:** Como o agente lida com situações limite
-
-📄 **Template:** [`docs/03-prompts.md`](./docs/03-prompts.md)
-
----
-
-### 4. Aplicação Funcional
-
-Desenvolva um **protótipo funcional** do seu agente:
-
-- Chatbot interativo (sugestão: Streamlit, Gradio ou similar)
-- Integração com LLM (via API ou modelo local)
-- Conexão com a base de conhecimento
-
-📁 **Pasta:** [`src/`](./src/)
+- 📄 [Documentação do Agente](./docs/01-documentacao-agente.md) - Caso de uso e arquitetura
+- 📄 [Base de Conhecimento](./docs/02-base-conhecimento.md) - Estratégia de dados
+- 📄 [Prompts](./docs/03-prompts.md) - Regras de comportamento
+- 📄 [Métricas](./docs/04-metricas.md) - Avaliação de qualidade
+- 📄 [Pitch](./docs/05-pitch.md) - Roteiro de apresentação
 
 ---
 
-### 5. Avaliação e Métricas
+## 📊 Dados Mockados
 
-Descreva como você avalia a qualidade do seu agente:
+Os seguintes arquivos estão em [`data/`](./data/):
 
-**Métricas Sugeridas:**
-- Precisão/assertividade das respostas
-- Taxa de respostas seguras (sem alucinações)
-- Coerência com o perfil do cliente
-
-📄 **Template:** [`docs/04-metricas.md`](./docs/04-metricas.md)
-
----
-
-### 6. Pitch
-
-Grave um **pitch de 3 minutos** (estilo elevador) apresentando:
-
-- Qual problema seu agente resolve?
-- Como ele funciona na prática?
-- Por que essa solução é inovadora?
-
-📄 **Template:** [`docs/05-pitch.md`](./docs/05-pitch.md)
+| Arquivo | Descrição |
+|---------|-----------|
+| `transacoes.csv` | Histórico de transações do cliente |
+| `historico_atendimento.csv` | Histórico de atendimentos anteriores |
+| `perfil_investidor.json` | Perfil e preferências do investidor |
+| `produtos_financeiros.json` | Produtos financeiros disponíveis |
 
 ---
 
-## Ferramentas Sugeridas
-
-Todas as ferramentas abaixo possuem versões gratuitas:
-
-| Categoria | Ferramentas |
-|-----------|-------------|
-| **LLMs** | [ChatGPT](https://chat.openai.com/), [Copilot](https://copilot.microsoft.com/), [Gemini](https://gemini.google.com/), [Claude](https://claude.ai/), [Ollama](https://ollama.ai/) |
-| **Desenvolvimento** | [Streamlit](https://streamlit.io/), [Gradio](https://www.gradio.app/), [Google Colab](https://colab.research.google.com/) |
-| **Orquestração** | [LangChain](https://www.langchain.com/), [LangFlow](https://www.langflow.org/), [CrewAI](https://www.crewai.com/) |
-| **Diagramas** | [Mermaid](https://mermaid.js.org/), [Draw.io](https://app.diagrams.net/), [Excalidraw](https://excalidraw.com/) |
-
----
-
-## Estrutura do Repositório
+## 🏗️ Estrutura do Projeto
 
 ```
-📁 lab-agente-financeiro/
+📁 dio-lab-bia-do-futuro/
 │
-├── 📄 README.md
+├── 📄 README.md                       # Este arquivo
+├── 📄 requirements.txt                # Dependências Python
 │
-├── 📁 data/                          # Dados mockados para o agente
-│   ├── historico_atendimento.csv     # Histórico de atendimentos (CSV)
-│   ├── perfil_investidor.json        # Perfil do cliente (JSON)
-│   ├── produtos_financeiros.json     # Produtos disponíveis (JSON)
-│   └── transacoes.csv                # Histórico de transações (CSV)
+├── 📁 data/                           # Dados mockados
+│   ├── historico_atendimento.csv      # Histórico de atendimentos
+│   ├── perfil_investidor.json         # Perfil do investidor
+│   ├── produtos_financeiros.json      # Produtos disponíveis
+│   └── transacoes.csv                 # Histórico de transações
 │
-├── 📁 docs/                          # Documentação do projeto
-│   ├── 01-documentacao-agente.md     # Caso de uso e arquitetura
-│   ├── 02-base-conhecimento.md       # Estratégia de dados
-│   ├── 03-prompts.md                 # Engenharia de prompts
-│   ├── 04-metricas.md                # Avaliação e métricas
-│   └── 05-pitch.md                   # Roteiro do pitch
+├── 📁 docs/                           # Documentação completa
+│   ├── 01-documentacao-agente.md      # Caso de uso e arquitetura
+│   ├── 02-base-conhecimento.md        # Estratégia de dados
+│   ├── 03-prompts.md                  # Regras e comportamento
+│   ├── 04-metricas.md                 # Avaliação e testes
+│   └── 05-pitch.md                    # Roteiro de apresentação
 │
-├── 📁 src/                           # Código da aplicação
-│   └── app.py                        # (exemplo de estrutura)
-│
-├── 📁 assets/                        # Imagens e diagramas
-│   └── ...
-│
-└── 📁 examples/                      # Referências e exemplos
-    └── README.md
+└── 📁 src/                            # Código da aplicação
+    ├── app.py                         # Aplicação Streamlit (main)
+    ├── agent.py                       # Lógica do agente financeiro
+    ├── data_loader.py                 # Carregamento e validação de dados
+    └── response_validator.py          # Validação de respostas (UX)
 ```
 
 ---
 
-## Dicas Finais
+## 🔒 Segurança e Limitações
 
-1. **Comece pelo prompt:** Um bom system prompt é a base de um agente eficaz
-2. **Use os dados mockados:** Eles garantem consistência e evitam problemas com dados sensíveis
-3. **Foque na segurança:** No setor financeiro, evitar alucinações é crítico
-4. **Teste cenários reais:** Simule perguntas que um cliente faria de verdade
-5. **Seja direto no pitch:** 3 minutos passam rápido, vá ao ponto
+### Estratégias Anti-Alucinação
+- ✅ Respostas baseadas **exclusivamente** nos dados mockados
+- ✅ Validação automática do tamanho das respostas (max 2 frases)
+- ✅ Fontes sempre documentadas e visíveis ao usuário
+- ✅ Quando não há dados, o agente admite a limitação
+
+### O Que Bia NÃO Faz
+- ❌ Não promete rentabilidade ou retornos financeiros
+- ❌ Não executa operações financeiras reais
+- ❌ Não acessa APIs externas ou dados externos
+- ❌ Não compartilha dados de outros usuários
+- ❌ Não responde sobre temas fora do escopo financeiro
+
+---
+
+## 🛠️ Tecnologias Utilizadas
+
+- **Streamlit** - Interface web interativa
+- **Pandas** - Manipulação de dados
+- **Python 3.8+** - Linguagem de programação
+
+---
+
+## 📝 Licença
+
+Este projeto foi desenvolvido como parte do lab DIO - Agente Financeiro com IA Generativa.
