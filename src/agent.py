@@ -68,7 +68,8 @@ class FinancialAgent:
             # Detect significant increase (>20%)
             if recent_total > previous_total * 1.2:
                 increase_pct = ((recent_total - previous_total) / previous_total) * 100
-                msg = (f"Seus gastos aumentaram {increase_pct:.0f}% nos últimos {days} dias. "
+                msg = (f"Analisando suas transações dos últimos {days} dias, percebi que seus gastos "
+                       f"aumentaram {increase_pct:.0f}% comparado ao período anterior. "
                        f"Pode ser um bom momento para revisar o orçamento.")
                 return True, msg, ["transacoes.csv:data,valor,tipo"]
             
@@ -104,8 +105,8 @@ class FinancialAgent:
                 count = recurring.iloc[0]
                 total = expenses[expenses['categoria'] == top_category]['valor'].sum()
                 
-                msg = (f"Você tem {count} despesas em '{top_category}' totalizando R$ {total:.2f}. "
-                       f"Considere analisar se há oportunidade de redução.")
+                msg = (f"Identificamos no seu histórico de transações {count} despesas em '{top_category}' "
+                       f"totalizando R$ {total:.2f}. Considere analisar se há oportunidade de redução.")
                 return True, msg, ["transacoes.csv:categoria,valor"]
             
             return False, "", []
@@ -138,8 +139,9 @@ class FinancialAgent:
             
             profile_type = self.profile.get('perfil_investidor', 'moderado')
             
-            msg = (f"Para atingir R$ {goal_value:.2f} em {months} meses, reserve R$ {monthly_needed:.2f} mensais. "
-                   f"Isso representa {pct_income:.1f}% da sua renda ({profile_type}).")
+            msg = (f"Com base no seu perfil financeiro, para atingir R$ {goal_value:.2f} em {months} meses, "
+                   f"você precisará reservar R$ {monthly_needed:.2f} mensais. "
+                   f"Isso representa {pct_income:.1f}% da sua renda atual.")
             
             return True, msg, ["perfil_investidor.json:renda_mensal,perfil_investidor"]
             
@@ -178,7 +180,7 @@ class FinancialAgent:
             
             if suitable_products:
                 product = suitable_products[0]
-                msg = (f"Com perfil {profile_type}, considere '{product['nome']}'. "
+                msg = (f"Considerando seu perfil de investidor {profile_type}, recomendo '{product['nome']}'. "
                        f"{product['indicado_para']}.")
                 return True, msg, ["perfil_investidor.json:perfil_investidor,aceita_risco", 
                                   "produtos_financeiros.json:nome,risco,indicado_para"]
@@ -216,8 +218,8 @@ class FinancialAgent:
             top_category = recent.groupby('categoria')['valor'].sum().idxmax()
             top_value = recent.groupby('categoria')['valor'].sum().max()
             
-            msg = (f"Você gastou R$ {total:.2f} nos últimos {days} dias. "
-                   f"Maior categoria: {top_category} (R$ {top_value:.2f}).")
+            msg = (f"Analisando suas transações dos últimos {days} dias, você gastou R$ {total:.2f}. "
+                   f"A maior categoria foi {top_category} com R$ {top_value:.2f}.")
             
             return True, msg, ["transacoes.csv:data,tipo,categoria,valor"]
             
