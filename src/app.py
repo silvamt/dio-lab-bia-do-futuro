@@ -5,11 +5,14 @@ Uses LLM as NLG layer to verbalize structured responses.
 """
 
 import streamlit as st
+import logging
 from data_loader import DataLoader
 from agent import FinancialAgent
 from response_validator import ResponseValidator
 from llm_adapter import LLMAdapter
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 # Page configuration
@@ -174,8 +177,7 @@ def process_user_input(user_input: str):
             response, sources, *_ = result
         else:
             # Unexpected result format - log warning and provide fallback
-            import logging
-            logging.warning(f"Unexpected result format from answer_query: {type(result)}")
+            logger.warning(f"Unexpected result format from answer_query: {type(result)}")
             response = str(result) if result else "Erro ao processar sua pergunta."
             sources = []
         
