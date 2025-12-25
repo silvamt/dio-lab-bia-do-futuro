@@ -1,8 +1,8 @@
-# 🤖 Moara - Agente Financeiro Proativo
+# 🤖 Moara - agente financeiro proativo
 
 ## Contexto
 
-**Moara (MOARA – Modular Orchestrated AI for Responsible Advisory)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Com interface mobile-first inspirada no WhatsApp, Moara oferece:
+**Moara (MOARA – Modular Orchestrated AI for Responsible Advisory - IA Orquestrada Modular para Aconselhamento Responsável)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Com interface mobile-first inspirada no WhatsApp, Moara oferece:
 
 - 📊 **Análise proativa de gastos** - Detecta aumentos atípicos automaticamente
 - 🔔 **Alertas inteligentes** - Identifica recorrências e oportunidades de economia
