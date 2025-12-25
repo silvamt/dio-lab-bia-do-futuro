@@ -1,8 +1,8 @@
-# 🤖 Bia - Agente Financeiro Proativo
+# 🤖 Moara - Agente Financeiro Proativo
 
 ## Contexto
 
-**Bia** é um agente financeiro inteligente e proativo que ajuda você a gerenciar suas finanças de forma simples e eficiente. Com interface mobile-first inspirada no WhatsApp e uso responsável de IA generativa, Bia oferece:
+**Moara (MOARA – Modular Orchestrated AI for Responsible Advisory)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Com interface mobile-first inspirada no WhatsApp, Moara oferece:
 
 - 📊 **Análise proativa de gastos** - Detecta aumentos atípicos automaticamente
 - 🔔 **Alertas inteligentes** - Identifica recorrências e oportunidades de economia
@@ -46,7 +46,7 @@ O aplicativo será aberto automaticamente no navegador em `http://localhost:8501
 
 ## 💬 Exemplos de Uso
 
-Experimente perguntar à Bia:
+Experimente perguntar à Moara:
 
 - "Quanto gastei este mês?"
 - "Tenho algum alerta?"
@@ -154,7 +154,7 @@ Os seguintes arquivos estão em [`data/`](./data/):
 - ✅ **System prompt restritivo** proíbe criação de informações
 - ✅ **Fallback determinístico** quando LLM indisponível
 
-### O Que Bia NÃO Faz
+### O Que Moara NÃO Faz
 - ❌ Não promete rentabilidade ou retornos financeiros
 - ❌ Não executa operações financeiras reais
 - ❌ Não acessa APIs externas ou dados externos

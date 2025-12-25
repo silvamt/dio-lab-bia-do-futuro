@@ -14,7 +14,7 @@ from datetime import datetime
 
 # Page configuration
 st.set_page_config(
-    page_title="Bia - Agente Financeiro",
+    page_title="Moara - Agente Financeiro",
     page_icon="💰",
     layout="centered",
     initial_sidebar_state="collapsed"
@@ -203,7 +203,7 @@ def main():
     initialize_session_state()
     
     # Title
-    st.title("💰 Bia - Agente Financeiro")
+    st.title("💰 Moara - Agente Financeiro")
     
     # Check if data loaded successfully
     if not st.session_state.data_loaded:
@@ -230,9 +230,9 @@ def main():
     
     # Sidebar with info (collapsed by default)
     with st.sidebar:
-        st.header("ℹ️ Sobre a Bia")
+        st.header("ℹ️ Sobre Moara")
         st.markdown("""
-        **Bia** é seu agente financeiro proativo.
+        **Moara (MOARA – Modular Orchestrated AI for Responsible Advisory)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada.
         
         Posso ajudar com:
         - 📊 Análise de gastos

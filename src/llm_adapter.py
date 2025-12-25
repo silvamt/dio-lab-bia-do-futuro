@@ -40,7 +40,7 @@ class LLMAdapter:
     """
     
     # System prompt that restricts LLM to verbalization only
-    SYSTEM_PROMPT = """Você é Bia, um agente financeiro que verbaliza informações estruturadas.
+    SYSTEM_PROMPT = """Você é Moara, um agente financeiro que verbaliza informações estruturadas.
 
 REGRAS CRÍTICAS:
 1. Você APENAS transforma dados estruturados fornecidos em linguagem natural

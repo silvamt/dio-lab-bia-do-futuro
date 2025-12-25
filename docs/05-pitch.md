@@ -1,4 +1,4 @@
-# Pitch - Bia, Agente Financeiro Proativo (3 minutos)
+# Pitch - Moara, Agente Financeiro Proativo (3 minutos)
 
 > [!TIP]
 > Este roteiro está estruturado para apresentação de 3 minutos com demonstração prática.
@@ -23,7 +23,7 @@
 
 **Apresentação:**
 
-"Apresento Bia - seu agente financeiro proativo que monitora seus gastos automaticamente e te alerta antes que vire problema."
+"Apresento Moara - um agente financeiro proativo construído sobre a arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory), que monitora seus gastos automaticamente e te alerta antes que vire problema."
 
 **Diferenciais:**
 
@@ -35,11 +35,11 @@
 
 4. **Transparente**: Cada resposta mostra a fonte dos dados. Você sabe exatamente de onde vem a informação
 
-5. **Governança de IA**: LLM usado de forma responsável, apenas como camada de linguagem, sem acesso direto aos dados ou poder de decisão
+5. **Governança de IA (MOARA)**: A arquitetura MOARA garante uso responsável de IA com modularidade, orquestração controlada e governança apropriada. LLM usado apenas como camada de linguagem, sem acesso direto aos dados ou poder de decisão
 
 **Como funciona:**
 
-"Bia analisa suas transações automaticamente usando regras determinísticas para cálculos e decisões. A IA generativa entra apenas para transformar os dados estruturados em linguagem natural. Sem IA black-box para decisões financeiras, sem surpresas. Dados ficam com você, processamento é local."
+"A arquitetura MOARA analisa suas transações automaticamente usando regras determinísticas para cálculos e decisões. A IA generativa entra apenas para transformar os dados estruturados em linguagem natural. Sem IA black-box para decisões financeiras, sem surpresas. Dados ficam com você, processamento é local."
 
 ---
 
@@ -48,7 +48,7 @@
 **Cenário 1: Alerta Proativo**
 ```
 Usuário: "Tenho algum alerta?"
-Bia: "Seus gastos aumentaram 35% nos últimos 7 dias. 
+Moara: "Seus gastos aumentaram 35% nos últimos 7 dias. 
       Pode ser um bom momento para revisar o orçamento."
 ```
 👉 Mostrar justificativa e fontes na interface
@@ -56,7 +56,7 @@ Bia: "Seus gastos aumentaram 35% nos últimos 7 dias.
 **Cenário 2: Planejamento de Meta**
 ```
 Usuário: "Como posso atingir minha meta?"
-Bia: "Para atingir R$ 15.000 em 8 meses, reserve R$ 1.875 mensais. 
+Moara: "Para atingir R$ 15.000 em 8 meses, reserve R$ 1.875 mensais. 
       Isso representa 37,5% da sua renda (moderado)."
 ```
 👉 Mostrar botão "Ver detalhes" com informações estendidas
@@ -64,7 +64,7 @@ Bia: "Para atingir R$ 15.000 em 8 meses, reserve R$ 1.875 mensais.
 **Cenário 3: Sugestão Personalizada**
 ```
 Usuário: "Que produto você recomenda?"
-Bia: "Com perfil moderado, considere 'Tesouro Selic'. 
+Moara: "Com perfil moderado, considere 'Tesouro Selic'. 
       Indicado para reserva de emergência e iniciantes."
 ```
 👉 Destacar compatibilidade automática com perfil
@@ -75,7 +75,7 @@ Bia: "Com perfil moderado, considere 'Tesouro Selic'.
 
 **Por que é inovador:**
 
-"Enquanto outros assistentes financeiros dependem 100% de LLMs que podem alucinar valores e dar conselhos errados, Bia usa **IA híbrida inteligente**: decisões financeiras são determinísticas, IA generativa apenas verbaliza. É o melhor dos dois mundos - **confiabilidade nas decisões** e **naturalidade na comunicação**."
+"Enquanto outros assistentes financeiros dependem 100% de LLMs que podem alucinar valores e dar conselhos errados, Moara usa a **arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory)**: decisões financeiras são determinísticas, IA generativa apenas verbaliza. É o melhor dos dois mundos - **confiabilidade nas decisões** e **naturalidade na comunicação**."
 
 **Impacto:**
 
@@ -83,11 +83,11 @@ Bia: "Com perfil moderado, considere 'Tesouro Selic'.
 - **Educação financeira**: Respostas curtas com justificativas ensinam enquanto informam
 - **Empoderamento**: Usuário toma decisões informadas, não segue ordens cegas
 - **Privacidade**: Dados ficam locais, LLM recebe apenas dados estruturados para verbalização
-- **Responsabilidade em IA**: Demonstra uso consciente de LLM com governança apropriada
+- **Responsabilidade em IA**: A arquitetura MOARA demonstra uso consciente de LLM com governança apropriada, modularidade e orquestração controlada
 
 **Visão de futuro:**
 
-"Bia é o primeiro passo para democratizar consultoria financeira de qualidade. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real."
+"Moara é o primeiro passo para democratizar consultoria financeira de qualidade. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real."
 
 ---
 
@@ -121,7 +121,7 @@ Bia: "Com perfil moderado, considere 'Tesouro Selic'.
 ### Slide 4: Diferencial
 - Tabela comparativa:
   - Outros: 100% LLM → pode alucinar valores
-  - Bia: IA Híbrida → decisões determinísticas + verbalização natural
+  - Moara: Arquitetura MOARA → decisões determinísticas + verbalização natural + governança
   - Destaque: "Melhor dos dois mundos"
 
 ### Slide 5: Impacto
@@ -149,11 +149,11 @@ Pois é. 70% dos brasileiros não têm controle adequado das suas finanças. E n
 
 **[0:30 - 1:30] Solução**
 
-"Apresento Bia - seu agente financeiro proativo. Bia monitora seus gastos automaticamente e te alerta ANTES que vire problema.
+"Apresento Moara - um agente financeiro proativo construído sobre a arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory). O sistema monitora seus gastos automaticamente e te alerta ANTES que vire problema.
 
 Tem três diferenciais principais:
 
-Primeiro: é proativa. Detecta quando seus gastos aumentam 35% em uma semana e te avisa para você agir.
+Primeiro: é proativo. Detecta quando seus gastos aumentam 35% em uma semana e te avisa para você agir.
 
 Segundo: mobile-first. Respostas curtas, máximo 2 frases, como se fosse WhatsApp. Nada de paragrafos intermináveis.
 
@@ -163,17 +163,17 @@ Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclus
 
 "Deixa eu mostrar. [abrir app]
 
-Pergunto: 'Tenho algum alerta?' e Bia analisa meus dados com lógica determinística, detecta que os gastos aumentaram 35%, e usa IA generativa apenas para verbalizar: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
+Pergunto: 'Tenho algum alerta?' e a arquitetura MOARA analisa meus dados com lógica determinística, detecta que os gastos aumentaram 35%, e usa IA generativa apenas para verbalizar: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
 
-Agora: 'Como posso atingir minha meta?' e ela calcula deterministicamente: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' O LLM só transforma os números em texto natural. E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
+Agora: 'Como posso atingir minha meta?' e o sistema calcula deterministicamente: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' O LLM só transforma os números em texto natural. E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
 
 E olha aqui embaixo - mostra as fontes dos dados. Total transparência."
 
 **[2:30 - 3:00] Diferencial e Encerramento**
 
-"Qual a grande sacada? Bia usa **IA híbrida inteligente**. Decisões financeiras são 100% determinísticas - sem alucinação de valores. IA generativa entra apenas para verbalizar em linguagem natural. É o melhor dos dois mundos: **confiabilidade nas decisões, naturalidade na comunicação**.
+"Qual a grande sacada? A **arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory)** garante modularidade, orquestração controlada e uso responsável de IA. Decisões financeiras são 100% determinísticas - sem alucinação de valores. IA generativa entra apenas para verbalizar em linguagem natural. É o melhor dos dois mundos: **confiabilidade nas decisões, naturalidade na comunicação**.
 
-O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados, IA responsável. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
+O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados, IA responsável com governança apropriada. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
 
 O código está no GitHub. Quer testar? [mostrar QR code]"
 
