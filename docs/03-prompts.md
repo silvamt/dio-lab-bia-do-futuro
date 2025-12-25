@@ -6,7 +6,85 @@
 
 - **Decisões financeiras**: 100% determinísticas (cálculos, alertas, validações)
 - **Geração de linguagem**: LLM usado apenas para verbalizar dados estruturados (NLG)
-- **Governança**: System prompt restritivo impede LLM de criar informações
+- **Classificação de intenções**: LLM usado opcionalmente para entender linguagem natural (NLU)
+- **Governança**: System prompts restritivos impedem LLM de criar informações
+
+---
+
+## Classificação de Intenções (Opcional)
+
+O sistema agora inclui um **classificador de intenções baseado em LLM** que melhora a compreensão de mensagens em linguagem natural.
+
+### Comportamento
+
+1. **Tentativa com LLM**: Se uma chave de API está configurada, o sistema primeiro tenta classificar a intenção usando LLM
+2. **Validação estrita**: A resposta do LLM é validada para garantir formato JSON correto e valores permitidos
+3. **Threshold de confiança**: Apenas classificações com confiança >= 0.7 são usadas
+4. **Fallback automático**: Se LLM falhar, retornar resultado inválido, ou ter baixa confiança, o sistema usa matching de palavras-chave determinístico
+5. **Sem API key**: Sistema funciona normalmente usando apenas matching de palavras-chave
+
+### Intenções Permitidas
+
+O LLM só pode classificar em uma das seguintes intenções:
+
+- `gastos` - Consultas sobre despesas e transações
+- `alertas` - Consultas sobre avisos e alertas financeiros
+- `metas` - Consultas sobre planejamento e objetivos financeiros
+- `produtos` - Consultas sobre produtos financeiros e investimentos
+- `saudacao` - Cumprimentos e saudações
+- `fora_escopo` - Mensagens fora do escopo financeiro
+
+### System Prompt para Classificação
+
+```
+Você é um classificador de intenções para um agente financeiro.
+
+Sua única tarefa é classificar a mensagem do usuário em UMA das seguintes intenções:
+
+INTENÇÕES PERMITIDAS:
+- gastos: Perguntas sobre despesas, gastos, quanto gastou, resumo de transações
+- alertas: Perguntas sobre alertas, avisos, aumentos de gastos, recorrências
+- metas: Perguntas sobre objetivos financeiros, planejamento, poupar, guardar dinheiro
+- produtos: Perguntas sobre investimentos, produtos financeiros, onde aplicar, recomendações
+- saudacao: Cumprimentos como oi, olá, bom dia, boa tarde, boa noite
+- fora_escopo: Qualquer outra coisa que não se encaixe nas categorias acima
+
+REGRAS CRÍTICAS:
+1. Retorne APENAS um JSON válido no formato exato: {"intent": "valor", "confidence": 0.0}
+2. O campo "intent" deve ser EXATAMENTE um dos valores permitidos
+3. O campo "confidence" deve ser um número entre 0.0 e 1.0
+4. NÃO adicione texto antes ou depois do JSON
+5. NÃO explique sua escolha
+6. NÃO faça cálculos ou recomendações
+7. APENAS classifique a intenção
+
+EXEMPLOS:
+"tô gastando demais" → {"intent": "alertas", "confidence": 0.95}
+"quanto saiu meu cartão" → {"intent": "gastos", "confidence": 0.9}
+"quero juntar dinheiro" → {"intent": "metas", "confidence": 0.95}
+"algo seguro pra investir" → {"intent": "produtos", "confidence": 0.9}
+```
+
+### Validação
+
+O sistema valida estritamente a resposta do LLM:
+
+✅ JSON válido  
+✅ Campos obrigatórios presentes (`intent` e `confidence`)  
+✅ Intent é um dos valores permitidos  
+✅ Confidence é número entre 0.0 e 1.0  
+
+❌ Qualquer desvio resulta em fallback para matching de palavras-chave
+
+### Segurança
+
+- **Sem alucinações**: LLM não tem acesso a dados financeiros durante classificação
+- **Sem decisões**: LLM apenas classifica, não calcula nem recomenda
+- **Validação rigorosa**: Saída do LLM é validada antes de uso
+- **Fallback garantido**: Sistema sempre funciona, com ou sem LLM
+
+> [!IMPORTANT]
+> A classificação de intenções é **completamente opcional**. O sistema funciona perfeitamente sem ela, usando matching de palavras-chave determinístico.
 
 ---
 
@@ -306,9 +384,11 @@ Fontes completas:
 
 7. **Fallback determinístico**: Sistema funciona sem LLM, usando mensagens pré-formatadas quando API não disponível.
 
+8. **Classificação de Intenções com LLM (opcional)**: Sistema usa LLM para classificar intenções de mensagens em linguagem natural, melhorando o roteamento de consultas. Se LLM indisponível ou retornar resultado inválido, faz fallback para matching de palavras-chave determinístico.
+
 ### Melhorias Futuras
 
-- Implementar sinônimos para palavras-chave (ex: "despesas" = "gastos")
+- ~~Implementar sinônimos para palavras-chave (ex: "despesas" = "gastos")~~ ✅ Implementado via classificação de intenções com LLM
 - Adicionar suporte a consultas por categoria específica
 - Permitir configuração do período de análise pelo usuário
 - Integrar histórico_atendimento.csv para contexto de conversas anteriores

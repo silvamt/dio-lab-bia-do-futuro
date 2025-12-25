@@ -42,17 +42,27 @@ export ANTHROPIC_API_KEY="sua-chave-aqui"
 O aplicativo será aberto automaticamente no navegador em `http://localhost:8501`
 
 > [!NOTE]
-> A aplicação funciona perfeitamente **sem chaves de API**. O LLM é usado apenas para verbalização de respostas estruturadas. Sem chave, o sistema usa mensagens pré-formatadas determinísticas.
+> A aplicação funciona perfeitamente **sem chaves de API**. O LLM é usado opcionalmente para:
+> - **Classificação de intenções**: Entende melhor mensagens em linguagem natural (ex: "tô gastando demais" → alertas)
+> - **Verbalização**: Transforma dados estruturados em linguagem natural
+> 
+> Sem chave de API, o sistema usa matching de palavras-chave e mensagens pré-formatadas determinísticas.
 
 ## 💬 Exemplos de Uso
 
-Experimente perguntar à Moara:
+Experimente perguntar à Moara (funciona com ou sem API key):
 
 - "Quanto gastei este mês?"
 - "Tenho algum alerta?"
 - "Como posso atingir minha meta?"
 - "Que produto você recomenda?"
 - "Olá!"
+
+**Com LLM configurado**, Moara também entende variações naturais:
+- "tô gastando demais" (entendido como pedido de alertas)
+- "quero juntar dinheiro" (entendido como planejamento de metas)
+- "quanto saiu meu cartão" (entendido como consulta de gastos)
+- "algo seguro pra investir" (entendido como pedido de produtos)
 
 > [!TIP]
 > Na pasta [`examples/`](./examples/) você encontra referências de implementação para cada etapa deste desafio.
@@ -175,11 +185,15 @@ Os seguintes arquivos estão em [`data/`](./data/):
 Este projeto demonstra **uso responsável de IA generativa**:
 
 - **Decisões financeiras**: 100% determinísticas (cálculos, validações, alertas)
+- **Classificação de intenções (opcional)**: LLM usado para entender linguagem natural
+  - Valida estritamente a saída do LLM (JSON com campos obrigatórios)
+  - Fallback automático para matching de palavras-chave se LLM falhar
+  - Threshold de confiança mínimo de 0.7
 - **Geração de linguagem**: LLM usado apenas para verbalizar dados estruturados
-- **Governança**: System prompt restritivo impede criação de informações
+- **Governança**: System prompts restritivos impedem criação de informações
 - **Fallback**: Sistema funciona sem LLM, usando mensagens pré-formatadas
 
-Esta arquitetura garante **zero alucinação de valores** enquanto mantém **naturalidade na comunicação**.
+Esta arquitetura garante **zero alucinação de valores** enquanto melhora **naturalidade na comunicação**.
 
 ---
 
