@@ -5,11 +5,14 @@ Uses LLM as NLG layer to verbalize structured responses.
 """
 
 import streamlit as st
+import logging
 from data_loader import DataLoader
 from agent import FinancialAgent
 from response_validator import ResponseValidator
 from llm_adapter import LLMAdapter
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 # Page configuration
@@ -168,7 +171,15 @@ def process_user_input(user_input: str):
     
     # Get agent response using new dynamic approach
     try:
-        response, sources = st.session_state.agent.answer_query(user_input)
+        # Defensive unpacking to handle edge cases
+        result = st.session_state.agent.answer_query(user_input)
+        if isinstance(result, tuple) and len(result) >= 2:
+            response, sources, *_ = result
+        else:
+            # Unexpected result format - log warning and provide fallback
+            logger.warning(f"Unexpected result format from answer_query: {type(result)}")
+            response = str(result) if result else "Erro ao processar sua pergunta."
+            sources = []
         
         # Validate response length (max 10 sentences for mobile-friendly display)
         is_valid, adjusted_response = ResponseValidator.validate_response(response, allow_detailed=False)
