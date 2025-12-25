@@ -201,27 +201,55 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
             max_tokens=150
         )
         
-        return response.choices[0].message.content.strip()
+        # Validate response structure
+        if not response.choices or len(response.choices) == 0:
+            logger.warning("OpenAI returned empty choices")
+            return self._mock_generate(structured_data)
+        
+        content = response.choices[0].message.content
+        if not content:
+            logger.warning("OpenAI returned empty content")
+            return self._mock_generate(structured_data)
+        
+        return content.strip()
     
     def _generate_gemini(self, structured_data: Dict) -> str:
         """Generate response using Gemini."""
         prompt = f"{self.SYSTEM_PROMPT}\n\n{self._build_prompt(structured_data)}"
         
         response = self.client.generate_content(prompt)
+        
+        # Validate response has text
+        if not hasattr(response, 'text') or not response.text:
+            logger.warning("Gemini returned no text content")
+            return self._mock_generate(structured_data)
+        
         return response.text.strip()
+    
+    # Claude model version constant
+    CLAUDE_MODEL = "claude-3-haiku-20240307"
     
     def _generate_claude(self, structured_data: Dict) -> str:
         """Generate response using Claude."""
         prompt = self._build_prompt(structured_data)
         
         message = self.client.messages.create(
-            model="claude-3-haiku-20240307",
+            model=self.CLAUDE_MODEL,
             max_tokens=150,
             system=self.SYSTEM_PROMPT,
             messages=[
                 {"role": "user", "content": prompt}
             ]
         )
+        
+        # Validate response structure
+        if not message.content or len(message.content) == 0:
+            logger.warning("Claude returned empty content")
+            return self._mock_generate(structured_data)
+        
+        if not hasattr(message.content[0], 'text') or not message.content[0].text:
+            logger.warning("Claude content has no text")
+            return self._mock_generate(structured_data)
         
         return message.content[0].text.strip()
     
