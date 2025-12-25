@@ -10,8 +10,27 @@ from typing import Tuple
 class ResponseValidator:
     """Validates and adjusts agent responses for mobile UX."""
     
-    MAX_SENTENCES_DEFAULT = 2
-    MAX_SENTENCES_DETAILED = 6
+    MAX_PARAGRAPHS_DEFAULT = 3
+    MAX_SENTENCES_PER_PARAGRAPH = 5
+    MAX_TOTAL_SENTENCES = 10
+    
+    @staticmethod
+    def count_paragraphs(text: str) -> int:
+        """
+        Count the number of paragraphs in text.
+        
+        Args:
+            text: Text to analyze
+            
+        Returns:
+            Number of paragraphs
+        """
+        if not text or not text.strip():
+            return 0
+        
+        # Split by double newlines or single newline that starts a new paragraph
+        paragraphs = [p.strip() for p in text.split('\n') if p.strip()]
+        return len(paragraphs)
     
     @staticmethod
     def count_sentences(text: str) -> int:
@@ -43,9 +62,11 @@ class ResponseValidator:
         """
         Validate that response meets length requirements.
         
+        For Moara, we allow up to 2-3 short paragraphs or up to 10 sentences total.
+        
         Args:
             response: Response text to validate
-            allow_detailed: If True, allows up to 6 sentences (detailed mode)
+            allow_detailed: If True, allows more detailed responses
             
         Returns:
             Tuple of (is_valid, adjusted_response)
@@ -53,9 +74,11 @@ class ResponseValidator:
         if not response or not response.strip():
             return True, response
         
+        # Count sentences - this is the primary constraint
         sentence_count = ResponseValidator.count_sentences(response)
-        max_sentences = (ResponseValidator.MAX_SENTENCES_DETAILED if allow_detailed 
-                        else ResponseValidator.MAX_SENTENCES_DEFAULT)
+        
+        # For Moara, we allow up to 10 sentences (2-3 short paragraphs)
+        max_sentences = ResponseValidator.MAX_TOTAL_SENTENCES
         
         if sentence_count <= max_sentences:
             return True, response

@@ -43,29 +43,33 @@ class LLMAdapter:
     """
     
     # System prompt that restricts LLM to verbalization only
-    SYSTEM_PROMPT = """Você é Moara, um agente financeiro que verbaliza informações estruturadas.
+    SYSTEM_PROMPT = """Você é Moara, um assistente financeiro.
 
-REGRAS CRÍTICAS:
-1. Você APENAS transforma dados estruturados fornecidos em linguagem natural
-2. NUNCA invente, calcule ou infira valores não fornecidos
-3. NUNCA adicione informações além das fornecidas
-4. NUNCA faça recomendações além das fornecidas
-5. Use linguagem clara, profissional e objetiva
-6. Respostas devem ser CURTAS (máximo 2 frases concisas)
-7. Não use emojis
-8. Seja direto ao ponto, sem rodeios
+Você recebe sempre:
+* Dados financeiros completos do usuário (transações, histórico, perfil e produtos), já carregados em memória
+* Uma pergunta em linguagem natural do usuário
 
-PROCESSO:
-- Você receberá dados estruturados com: intenção, valores calculados, e mensagem base
-- Sua tarefa é apenas verbalizar esses dados de forma natural e clara
-- Mantenha todos os números exatamente como fornecidos
-- Mantenha o tom consultivo e objetivo
+Sua tarefa é:
+* Interpretar livremente a pergunta do usuário
+* Analisar todos os dados disponíveis
+* Produzir a melhor resposta possível com base nesses dados
 
-EXEMPLO:
-Entrada: {"intent": "spending_summary", "data": {"total": 2289.90, "category": "moradia", "category_total": 1380.00, "days": 30}}
-Saída: "Você gastou R$ 2.289,90 nos últimos 30 dias. Maior categoria: moradia (R$ 1.380,00)."
+Regras de comportamento:
+* Use apenas as informações presentes nos dados fornecidos
+* Não invente valores, transações ou produtos
+* Quando algo não puder ser respondido com os dados disponíveis, informe isso de forma clara
+* Priorize respostas objetivas, claras e úteis
+* Use linguagem natural, direta e adequada para interface de chat
+* Não explique regras internas, arquitetura ou funcionamento do sistema
+* Não faça suposições além do que os dados permitem
 
-Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeiras."""
+Formato da resposta:
+* Texto livre
+* Máximo de 2 a 3 parágrafos curtos
+* Quando relevante, mencione explicitamente de onde a informação foi obtida (ex: transações, perfil, histórico)
+
+Objetivo:
+Ajudar o usuário a entender sua situação financeira e tomar decisões melhores, usando exclusivamente os dados disponíveis."""
 
     # Model version constants
     OPENAI_MODEL = "gpt-3.5-turbo"
@@ -205,7 +209,7 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
                 {"role": "user", "content": prompt}
             ],
             temperature=0.3,
-            max_tokens=150
+            max_tokens=300
         )
         
         # Validate response structure
@@ -239,7 +243,7 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
         
         message = self.client.messages.create(
             model=self.CLAUDE_MODEL,
-            max_tokens=150,
+            max_tokens=300,
             system=self.SYSTEM_PROMPT,
             messages=[
                 {"role": "user", "content": prompt}
@@ -262,14 +266,17 @@ Lembre-se: você é apenas a camada de linguagem. Não tome decisões financeira
         intent = structured_data.get('intent', 'unknown')
         data = structured_data.get('data', {})
         base_message = structured_data.get('base_message', '')
+        sources = structured_data.get('sources', [])
         
-        prompt = f"""Verbalize os seguintes dados estruturados em linguagem natural (máximo 2 frases):
+        prompt = f"""Com base nos dados financeiros do usuário, responda a consulta relacionada a: {intent}
 
-Intenção: {intent}
-Dados: {data}
-Mensagem base de referência: {base_message}
+Dados disponíveis: {data}
 
-Gere uma resposta clara e objetiva, mantendo todos os valores exatos fornecidos."""
+Mensagem de referência: {base_message}
+
+Fontes dos dados: {', '.join(sources) if sources else 'dados do sistema'}
+
+Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a informação foi obtida quando relevante (transações, perfil, histórico). Mantenha todos os valores exatos fornecidos."""
         
         return prompt
     
