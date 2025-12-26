@@ -90,12 +90,13 @@ A avaliação de Moara combina duas abordagens:
 ## Resultados
 
 ### O que funcionou bem:
-- ✅ **Zero alucinações**: Lógica determinística garante 100% de assertividade com dados disponíveis
-- ✅ **Brevidade consistente**: Validador automático garante máximo 2 frases em toda resposta
+- ✅ **Zero alucinações**: System prompt restritivo e validação garantem respostas baseadas exclusivamente em dados disponíveis
+- ✅ **Brevidade consistente**: Validador automático garante máximo 6 frases em toda resposta
 - ✅ **Transparência**: Todas as respostas incluem fontes explícitas
 - ✅ **Tratamento de edge cases**: Agente lida bem com perguntas fora do escopo
 - ✅ **Validação de schema**: Erros de dados são detectados na inicialização
 - ✅ **Coerência de perfil**: Produtos sugeridos sempre respeitam perfil do investidor
+- ✅ **Flexibilidade**: LLM interpreta livremente qualquer pergunta sobre os dados
 
 ### O que pode melhorar:
 - 🔄 **Sinônimos**: Adicionar reconhecimento de mais variações de palavras-chave
@@ -158,7 +159,7 @@ Cada método retorna tupla `(success, message, sources)` onde sources lista arqu
 Para evolução do projeto:
 
 ### Observabilidade
-- **Latência**: Tempo médio de resposta (atualmente <100ms por ser determinístico)
+- **Latência**: Tempo médio de resposta (varia conforme provedor de LLM usado)
 - **Taxa de erro**: Quantidade de exceções capturadas
 - **Uso por funcionalidade**: Quais análises são mais solicitadas
 
@@ -168,8 +169,9 @@ Para evolução do projeto:
 - **Queries não reconhecidas**: % de perguntas que caem no default
 
 ### Custos
-- **Não aplicável**: Sem uso de LLM externo = zero custo de API
-- Futuramente, se adicionar LLM: tracking de tokens e custos
+- **Com LLM configurado**: Tracking de tokens e custos por provedor (OpenAI, Gemini, Claude)
+- **Sem LLM (fallback)**: Zero custo de API, apenas processamento local
+- Futuramente: métricas detalhadas por tipo de query e uso de tokens
 
 **Ferramentas sugeridas:** LangWatch, LangFuse, Prometheus + Grafana
 
@@ -177,4 +179,4 @@ Para evolução do projeto:
 
 ## Conclusão
 
-O agente Moara atende plenamente aos critérios de segurança, brevidade e transparência definidos. A arquitetura determinística elimina alucinações, e os validadores automáticos garantem experiência mobile-first consistente. As métricas automáticas facilitam manutenção e evolução do sistema.
+O agente Moara atende plenamente aos critérios de segurança, brevidade e transparência definidos. A arquitetura com LLM controlado por system prompt restritivo minimiza alucinações, e os validadores automáticos garantem experiência mobile-first consistente. As métricas automáticas facilitam manutenção e evolução do sistema.
