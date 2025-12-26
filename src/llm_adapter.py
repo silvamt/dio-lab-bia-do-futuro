@@ -745,15 +745,12 @@ Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a
         
         if matched_greeting:
             remaining = text_lower[len(matched_greeting):].strip()
-            # If there's significant content after greeting, classify as financial if it matches
+            # If there's significant content after greeting, check if it's financial
             if remaining and len(remaining) > 3:
                 if any(keyword in remaining for keyword in financial_keywords):
                     return 1
-                else:
-                    return 0
-            else:
-                # Just greeting
-                return 0
+            # Just greeting or greeting with non-financial content
+            return 0
         
         # If not clearly greeting or financial, treat as valid (1) to let agent handle it
         return 1
