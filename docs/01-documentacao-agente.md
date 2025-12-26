@@ -75,20 +75,23 @@ flowchart TD
 | LLM Adapter | Interface para múltiplos provedores de LLM com fallback | OpenAI/Gemini/Claude (opcional) |
 | Response Validator | Valida limite de 6 frases nas respostas | Python (regex) |
 | Data Loader | Carrega e valida schema dos dados mockados | Pandas |
+| Security Utils | Validação e sanitização de entrada do usuário | Python |
+| Constants | Centraliza configurações e valores constantes | Python |
 | Data Files | Arquivos CSV/JSON com dados do usuário | Filesystem |
 
 ### Fluxo de Dados
 
 1. **Inicialização**: Data Loader carrega e valida arquivos em `/data`
 2. **Query do usuário**: Mensagem digitada na interface de chat
-3. **Preparação de contexto**: Agent formata todos os dados (transações, perfil, histórico, produtos) em texto estruturado
-4. **Análise pelo LLM**: LLM Adapter envia system prompt + dados + pergunta para o provedor configurado
-5. **Interpretação livre**: LLM analisa todos os dados disponíveis e interpreta a pergunta do usuário de forma dinâmica
-6. **Geração de resposta**: LLM gera resposta em texto natural baseada exclusivamente nos dados fornecidos
-7. **Validação**: Response Validator garante máximo 6 frases (2-3 parágrafos curtos)
-8. **Extração de fontes**: Sistema identifica quais arquivos de dados foram relevantes para a resposta
-9. **Exibição**: Interface mostra resposta com justificativa e fontes
-10. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
+3. **Sanitização**: Security Utils valida e sanitiza a entrada do usuário
+4. **Preparação de contexto**: Agent formata todos os dados (transações, perfil, histórico, produtos) em texto estruturado
+5. **Análise pelo LLM**: LLM Adapter envia system prompt + dados + pergunta para o provedor configurado
+6. **Interpretação livre**: LLM analisa todos os dados disponíveis e interpreta a pergunta do usuário de forma dinâmica
+7. **Geração de resposta**: LLM gera resposta em texto natural baseada exclusivamente nos dados fornecidos
+8. **Validação**: Response Validator garante máximo 6 frases (2-3 parágrafos curtos)
+9. **Extração de fontes**: Sistema identifica quais arquivos de dados foram relevantes para a resposta
+10. **Exibição**: Interface mostra resposta com justificativa e fontes
+11. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
 
 ### Uso de IA Generativa
 
@@ -115,6 +118,9 @@ Esta arquitetura garante:
 ### Estratégias Adotadas
 
 - [x] Agente opera **exclusivamente** com dados fornecidos em `/data`
+- [x] **Validação de entrada**: Security Utils sanitiza entrada do usuário (remove caracteres de controle, limita tamanho)
+- [x] **Validação de caminhos**: Prevenção de directory traversal em carregamento de arquivos
+- [x] **Validação de API keys**: Verificação segura sem exposição de credenciais
 - [x] System prompt **restritivo** proíbe LLM de criar informações além dos dados
 - [x] Respostas incluem **fonte explícita** (arquivo utilizado)
 - [x] Quando não há dados suficientes, admite limitação claramente

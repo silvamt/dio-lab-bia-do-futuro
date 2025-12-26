@@ -150,7 +150,9 @@ Os seguintes arquivos estão em [`data/`](./data/):
     ├── agent.py                       # Lógica do agente financeiro
     ├── llm_adapter.py                 # Adaptador LLM (múltiplos provedores)
     ├── data_loader.py                 # Carregamento e validação de dados
-    └── response_validator.py          # Validação de respostas (UX)
+    ├── response_validator.py          # Validação de respostas (UX)
+    ├── constants.py                   # Constantes e configurações centralizadas
+    └── security_utils.py              # Validação e sanitização de entrada
 ```
 
 ---

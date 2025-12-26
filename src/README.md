@@ -10,25 +10,37 @@ src/
 ├── agent.py                  # Lógica do agente financeiro (análise dinâmica)
 ├── llm_adapter.py           # Adaptador para múltiplos provedores de LLM
 ├── data_loader.py           # Carregamento e validação de dados mockados
-└── response_validator.py    # Validação de respostas (limite de frases)
+├── response_validator.py    # Validação de respostas (limite de frases)
+├── constants.py             # Constantes e configurações centralizadas
+└── security_utils.py        # Validação e sanitização de entrada do usuário
 ```
 
 ## Descrição dos Módulos
 
 ### app.py
-Interface web interativa estilo WhatsApp usando Streamlit. Gerencia o fluxo de conversação e exibição de mensagens com suporte a detalhes expansíveis.
+Interface web interativa estilo WhatsApp usando Streamlit. Gerencia o fluxo de conversação e exibição de mensagens com suporte a detalhes expansíveis. Aplica sanitização de entrada do usuário antes do processamento.
 
 ### agent.py
 Implementa a lógica do agente financeiro. Prepara todos os dados disponíveis e delega ao LLM para análise dinâmica e geração de respostas baseadas exclusivamente nos dados fornecidos.
 
 ### llm_adapter.py
-Adaptador que suporta múltiplos provedores de LLM (OpenAI, Gemini, Claude) com fallback determinístico quando nenhuma API está configurada. Implementa o system prompt que garante respostas seguras e baseadas em dados.
+Adaptador que suporta múltiplos provedores de LLM (OpenAI, Gemini, Claude) com fallback determinístico quando nenhuma API está configurada. Implementa o system prompt que garante respostas seguras e baseadas em dados. Utiliza validação segura de API keys.
 
 ### data_loader.py
-Carrega e valida os arquivos de dados da pasta `/data`. Verifica schema obrigatório e converte tipos de dados apropriadamente.
+Carrega e valida os arquivos de dados da pasta `/data`. Verifica schema obrigatório, valida caminhos de arquivo (prevenção de directory traversal) e converte tipos de dados apropriadamente.
 
 ### response_validator.py
 Valida que as respostas atendam aos requisitos de UX mobile-first (máximo 6 frases). Fornece métodos para formatação de fontes e justificativas.
+
+### constants.py
+Centraliza todas as constantes e configurações da aplicação, incluindo limites de resposta, configurações de LLM, nomes de arquivos, e limites de segurança. Facilita manutenção e modificação de parâmetros.
+
+### security_utils.py
+Fornece funções de segurança para validação e sanitização de entrada do usuário:
+- `sanitize_user_input()`: Remove caracteres de controle e limita tamanho
+- `validate_api_key()`: Valida formato de API keys sem exposição
+- `get_secure_api_key()`: Recuperação segura de API keys do ambiente
+- `validate_file_path()`: Previne ataques de directory traversal
 
 ## Dependências
 
@@ -67,12 +79,13 @@ A aplicação será aberta automaticamente no navegador em `http://localhost:850
 ## Fluxo de Execução
 
 1. **Inicialização** (`app.py`):
-   - Carrega dados via `DataLoader`
+   - Carrega dados via `DataLoader` com validação de segurança
    - Inicializa `LLMAdapter` (com ou sem API key)
    - Cria instância de `FinancialAgent`
 
-2. **Query do Usuário** (`app.py` → `agent.py`):
+2. **Query do Usuário** (`app.py` → `security_utils.py` → `agent.py`):
    - Usuário digita mensagem na interface
+   - `sanitize_user_input()` valida e limpa a entrada
    - `agent.answer_query()` prepara todos os dados
    - Dados são enviados ao LLM via `llm_adapter`
 
