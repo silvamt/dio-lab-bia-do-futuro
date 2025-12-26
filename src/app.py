@@ -221,7 +221,7 @@ def main():
     # Welcome message on first load
     if len(st.session_state.messages) == 0:
         name = st.session_state.user_name
-        welcome_msg = f"Olá, {name}. Estou aqui para ajudar com suas finanças. Como posso ajudar hoje?"
+        welcome_msg = f"Olá, {name}. Sou a Moara e estou aqui para ajudar você a cuidar das suas finanças. O que vamos analisar hoje?"
         add_message("assistant", welcome_msg)
     
     # Display chat messages
