@@ -84,14 +84,19 @@ flowchart TD
 1. **Inicialização**: Data Loader carrega e valida arquivos em `/data`
 2. **Query do usuário**: Mensagem digitada na interface de chat
 3. **Sanitização**: Security Utils valida e sanitiza a entrada do usuário
-4. **Preparação de contexto**: Agent formata todos os dados (transações, perfil, histórico, produtos) em texto estruturado
-5. **Análise pelo LLM**: LLM Adapter envia system prompt + dados + pergunta para o provedor configurado
-6. **Interpretação livre**: LLM analisa todos os dados disponíveis e interpreta a pergunta do usuário de forma dinâmica
-7. **Geração de resposta**: LLM gera resposta em texto natural baseada exclusivamente nos dados fornecidos
-8. **Validação**: Response Validator garante máximo 6 frases (2-3 parágrafos curtos)
-9. **Extração de fontes**: Sistema identifica quais arquivos de dados foram relevantes para a resposta
-10. **Exibição**: Interface mostra resposta com justificativa e fontes
-11. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
+4. **Classificação (PRIMEIRA CHAMADA)**: LLM Adapter classifica a mensagem em três categorias:
+   - **-1 (inválida)**: Mensagens vazias, genéricas ou sem conteúdo útil
+   - **0 (saudação)**: Cumprimentos sem conteúdo financeiro
+   - **1 (válida)**: Mensagens com intenção financeira
+5. **Resposta rápida**: Para classificações -1 e 0, retorna resposta pré-definida sem processar dados
+6. **Preparação de contexto**: Para classificação 1, Agent formata todos os dados (transações, perfil, histórico, produtos) em texto estruturado
+7. **Análise pelo LLM (SEGUNDA CHAMADA)**: LLM Adapter envia system prompt + dados + pergunta para o provedor configurado
+8. **Interpretação livre**: LLM analisa todos os dados disponíveis e interpreta a pergunta do usuário de forma dinâmica
+9. **Geração de resposta**: LLM gera resposta em texto natural baseada exclusivamente nos dados fornecidos
+10. **Validação**: Response Validator garante máximo 6 frases (2-3 parágrafos curtos)
+11. **Extração de fontes**: Sistema identifica quais arquivos de dados foram relevantes para a resposta
+12. **Exibição**: Interface mostra resposta com justificativa e fontes
+13. **Detalhes opcionais**: Usuário pode clicar para ver informações estendidas
 
 ### Uso de IA Generativa
 

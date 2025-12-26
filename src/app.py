@@ -86,6 +86,71 @@ st.markdown("""
         font-size: 12px;
         color: #666;
     }
+    
+    /* ================================================================
+       CSS para evitar sobreposição de botões flutuantes do Streamlit Cloud
+       no componente st.chat_input
+       ================================================================ */
+    
+    /* Reservar espaço inferior no container principal para acomodar chat input
+       e prevenir que conteúdo seja escondido por elementos fixos */
+    .block-container {
+        padding-bottom: 120px !important;
+    }
+    
+    /* Reservar espaço à direita do chat input para botões flutuantes
+       (Desktop - padrão) */
+    [data-testid="stChatInput"] {
+        padding-right: 80px !important;
+    }
+    
+    /* Garantir que o campo de texto dentro do chat input não seja coberto */
+    [data-testid="stChatInput"] > div {
+        margin-right: 0 !important;
+    }
+    
+    /* Ajustar o botão de envio para não ser coberto por ícones flutuantes */
+    [data-testid="stChatInput"] button {
+        margin-right: 10px !important;
+    }
+    
+    /* ================================================================
+       Media Queries Responsivas
+       ================================================================ */
+    
+    /* Tablets (≤768px) - aumentar padding para acomodar múltiplos ícones */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-bottom: 140px !important;
+        }
+        
+        [data-testid="stChatInput"] {
+            padding-right: 100px !important;
+        }
+    }
+    
+    /* Smartphones (≤480px) - aumentar ainda mais o padding devido ao
+       empilhamento de ícones em telas pequenas */
+    @media (max-width: 480px) {
+        .block-container {
+            padding-bottom: 160px !important;
+        }
+        
+        [data-testid="stChatInput"] {
+            padding-right: 120px !important;
+        }
+        
+        /* Ajustar o campo de entrada para melhor visualização em mobile */
+        [data-testid="stChatInput"] textarea {
+            padding-right: 10px !important;
+        }
+    }
+    
+    /* Garantir que o z-index do chat input seja adequado mas não conflite
+       com elementos flutuantes do Streamlit Cloud */
+    [data-testid="stChatInput"] {
+        z-index: 99 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -182,7 +247,34 @@ def process_user_input(user_input: str):
     # Add user message
     add_message("user", sanitized_input)
     
-    # Get agent response using new dynamic approach
+    # FIRST CALL: Classify the message
+    try:
+        classification = st.session_state.llm_adapter.classify_user_message(sanitized_input)
+        logger.info(f"Message classified as: {classification}")
+        
+        # Handle classification results
+        if classification == -1:
+            # Invalid or insufficient message
+            response = ("Olá! Sou a Moara, sua assistente financeira. Posso te ajudar a entender seus gastos, "
+                       "planejar objetivos financeiros, analisar suas transações e recomendar produtos adequados "
+                       "ao seu perfil. Como posso te ajudar hoje?")
+            add_message("assistant", response)
+            return
+        
+        elif classification == 0:
+            # Greeting only
+            name = st.session_state.get('user_name', 'Cliente')
+            response = f"Olá, {name}! Como posso te ajudar com suas finanças hoje?"
+            add_message("assistant", response)
+            return
+        
+        # classification == 1: Valid financial message, proceed with agent
+        
+    except Exception as e:
+        logger.error(f"Classification error: {e}, treating as valid message")
+        # On classification error, treat as valid to avoid blocking user
+    
+    # SECOND CALL: Get agent response using existing dynamic approach
     try:
         # Defensive unpacking to handle edge cases
         result = st.session_state.agent.answer_query(sanitized_input)

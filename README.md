@@ -70,6 +70,12 @@ Experimente perguntar à Moara (funciona com ou sem API key):
 
 ## 📋 Funcionalidades
 
+### Classificador de Mensagens Inteligente
+- **Classificação automática**: Sistema de duas etapas filtra mensagens antes do processamento
+- **Três categorias**: Inválidas (-1), Saudações (0), Consultas financeiras (1)
+- **Economia de recursos**: Evita chamadas desnecessárias à API LLM para mensagens simples
+- **Respostas rápidas**: Saudações e mensagens inválidas recebem respostas instantâneas
+
 ### Alertas Proativos
 - **Detecção de aumento de gastos**: Compara últimos 7 dias com período anterior
 - **Identificação de recorrências**: Encontra despesas que se repetem
@@ -83,6 +89,7 @@ Experimente perguntar à Moara (funciona com ou sem API key):
 ### UX Mobile-First
 - **Respostas concisas**: Máximo 6 frases (2-3 parágrafos curtos) na resposta principal
 - **Interface WhatsApp**: Bolhas de chat e entrada fixada no rodapé
+- **CSS responsivo**: Evita sobreposição de botões flutuantes do Streamlit Cloud
 - **Detalhes sob demanda**: Botão "Ver detalhes" para informações estendidas
 - **Justificativas transparentes**: Cada resposta indica a fonte dos dados
 
