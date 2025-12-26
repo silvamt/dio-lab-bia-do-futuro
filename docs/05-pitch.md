@@ -26,6 +26,8 @@ Essa abordagem garante confiabilidade, governança e uso responsável de IA no c
 
 ## Exemplos de Uso
 
+Acesso: https://dio-moara.streamlit.app/
+
 **Alerta proativo**
 
 > “Seus gastos aumentaram 35% nos últimos 7 dias.
