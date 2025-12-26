@@ -37,11 +37,12 @@ Todos os 4 arquivos mockados na pasta `data/` são utilizados:
 
 ## Adaptações nos Dados
 
-Os dados mockados foram utilizados **sem modificações** para demonstrar o funcionamento do agente com dados realistas. O schema mínimo é validado automaticamente pelo módulo `DataLoader`:
+Os dados mockados foram utilizados **sem modificações** para demonstrar o funcionamento do agente com dados realistas. O schema mínimo é validado automaticamente pelo módulo `DataLoader` com melhorias de segurança:
 
 - **Validação de existência**: Verifica se arquivos obrigatórios estão presentes
+- **Validação de caminhos**: Previne directory traversal validando que arquivos estão no diretório esperado
 - **Validação de schema**: Verifica campos obrigatórios em cada arquivo
-- **Tratamento de erros**: Mensagens claras e objetivas quando há inconsistências
+- **Tratamento de erros**: Mensagens claras e objetivas quando há inconsistências com logging estruturado
 - **Conversão de tipos**: Datas convertidas para datetime, valores mantidos como float
 
 Caso os dados não atendam aos requisitos, o agente exibe erro claro e específico na interface.
@@ -52,14 +53,14 @@ Caso os dados não atendam aos requisitos, o agente exibe erro claro e específi
 
 ### Como os dados são carregados?
 
-Os dados são carregados na **inicialização da aplicação** através do módulo `data_loader.py`:
+Os dados são carregados na **inicialização da aplicação** através do módulo `data_loader.py` com validações de segurança:
 
 ```python
 loader = DataLoader()
 transactions, history, profile, products = loader.load_all_data()
 ```
 
-O carregamento acontece uma vez e os dados ficam em memória durante a sessão do Streamlit, armazenados em `st.session_state.agent`.
+O carregamento acontece uma vez e os dados ficam em memória durante a sessão do Streamlit, armazenados em `st.session_state.agent`. O `DataLoader` valida caminhos de arquivo para prevenir ataques de directory traversal e aplica tratamento robusto de erros JSON/CSV.
 
 ### Como os dados são usados no prompt?
 

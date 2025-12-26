@@ -8,6 +8,8 @@ import logging
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple, Optional, Any
 
+from constants import FILE_TRANSACTIONS, FILE_PROFILE, FILE_PRODUCTS, FILE_HISTORY
+
 logger = logging.getLogger(__name__)
 
 
@@ -39,7 +41,20 @@ class FinancialAgent:
         Returns:
             Dictionary with all financial data ready for LLM context
         """
-        # Convert transactions DataFrame to list of dicts
+        return {
+            'transactions': self._prepare_transactions(),
+            'history': self._prepare_history(),
+            'profile': self.profile,
+            'products': self.products
+        }
+    
+    def _prepare_transactions(self) -> List[Dict]:
+        """
+        Convert transactions DataFrame to list of dictionaries.
+        
+        Returns:
+            List of transaction dictionaries
+        """
         transactions_list = []
         if len(self.transactions) > 0:
             for _, row in self.transactions.iterrows():
@@ -50,8 +65,15 @@ class FinancialAgent:
                     'valor': float(row['valor']) if pd.notna(row['valor']) else 0.0,
                     'tipo': str(row['tipo']) if pd.notna(row['tipo']) else 'N/A'
                 })
+        return transactions_list
+    
+    def _prepare_history(self) -> List[Dict]:
+        """
+        Convert history DataFrame to list of dictionaries.
         
-        # Convert history DataFrame to list of dicts
+        Returns:
+            List of history dictionaries
+        """
         history_list = []
         if len(self.history) > 0:
             for _, row in self.history.iterrows():
@@ -62,13 +84,7 @@ class FinancialAgent:
                     'resumo': str(row['resumo']) if pd.notna(row['resumo']) else 'N/A',
                     'resolvido': bool(row['resolvido']) if pd.notna(row['resolvido']) else False
                 })
-        
-        return {
-            'transactions': transactions_list,
-            'history': history_list,
-            'profile': self.profile,
-            'products': self.products
-        }
+        return history_list
     
     def answer_query(self, query: str) -> Tuple[str, List[str]]:
         """
@@ -107,34 +123,57 @@ class FinancialAgent:
         Extract likely data sources based on response content and query.
         
         This is a simple heuristic - in production, LLM could return structured sources.
+        
+        Args:
+            response: The generated response text
+            query: The original user query
+            
+        Returns:
+            List of source file names
         """
         sources = []
         response_lower = response.lower()
         query_lower = query.lower()
         
         # Check for transaction-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['transação', 'transações', 'gasto', 'gastos', 'despesa', 'despesas', 'gastou']):
-            sources.append('transacoes.csv')
+        if self._contains_transaction_keywords(response_lower, query_lower):
+            sources.append(FILE_TRANSACTIONS)
         
         # Check for profile-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['perfil', 'renda', 'salário', 'meta', 'metas', 'objetivo', 'reserva']):
-            sources.append('perfil_investidor.json')
+        if self._contains_profile_keywords(response_lower, query_lower):
+            sources.append(FILE_PROFILE)
         
         # Check for product-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['produto', 'produtos', 'investimento', 'investir', 'aplicar', 'recomend']):
-            sources.append('produtos_financeiros.json')
+        if self._contains_product_keywords(response_lower, query_lower):
+            sources.append(FILE_PRODUCTS)
         
         # Check for history-related keywords
-        if any(word in response_lower or word in query_lower for word in 
-               ['histórico', 'atendimento', 'atendimentos', 'anterior']):
-            sources.append('historico_atendimento.csv')
+        if self._contains_history_keywords(response_lower, query_lower):
+            sources.append(FILE_HISTORY)
         
         # Default to general data if no specific sources identified
         if not sources:
             sources.append('dados do sistema')
         
         return sources
+    
+    def _contains_transaction_keywords(self, response: str, query: str) -> bool:
+        """Check if text contains transaction-related keywords."""
+        keywords = ['transação', 'transações', 'gasto', 'gastos', 'despesa', 'despesas', 'gastou']
+        return any(word in response or word in query for word in keywords)
+    
+    def _contains_profile_keywords(self, response: str, query: str) -> bool:
+        """Check if text contains profile-related keywords."""
+        keywords = ['perfil', 'renda', 'salário', 'meta', 'metas', 'objetivo', 'reserva']
+        return any(word in response or word in query for word in keywords)
+    
+    def _contains_product_keywords(self, response: str, query: str) -> bool:
+        """Check if text contains product-related keywords."""
+        keywords = ['produto', 'produtos', 'investimento', 'investir', 'aplicar', 'recomend']
+        return any(word in response or word in query for word in keywords)
+    
+    def _contains_history_keywords(self, response: str, query: str) -> bool:
+        """Check if text contains history-related keywords."""
+        keywords = ['histórico', 'atendimento', 'atendimentos', 'anterior']
+        return any(word in response or word in query for word in keywords)
 

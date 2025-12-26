@@ -8,8 +8,15 @@ Also provides optional intent classification for natural language routing.
 
 import os
 import json
-from typing import Dict, Optional, Tuple
 import logging
+from typing import Dict, Optional, Tuple
+
+from constants import (
+    OPENAI_MODEL, GEMINI_MODEL, CLAUDE_MODEL,
+    MAX_TOKENS_LLM, LLM_TEMPERATURE,
+    MAX_TRANSACTIONS_DISPLAY, MAX_HISTORY_DISPLAY
+)
+from security_utils import get_secure_api_key
 
 # Try to import optional LLM libraries
 try:
@@ -73,10 +80,6 @@ Formato da resposta:
 Objetivo:
 Ajudar o usuário a entender sua situação financeira e tomar decisões melhores, usando exclusivamente os dados disponíveis."""
 
-    # Model version constants
-    OPENAI_MODEL = "gpt-3.5-turbo"
-    CLAUDE_MODEL = "claude-3-haiku-20240307"
-
     def __init__(self, provider: Optional[str] = None):
         """
         Initialize LLM adapter.
@@ -101,11 +104,11 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
     
     def _detect_provider(self) -> str:
         """Auto-detect available LLM provider from environment variables."""
-        if os.getenv('OPENAI_API_KEY') and OPENAI_AVAILABLE:
+        if get_secure_api_key('OPENAI_API_KEY') and OPENAI_AVAILABLE:
             return 'openai'
-        elif os.getenv('GEMINI_API_KEY') and GEMINI_AVAILABLE:
+        elif get_secure_api_key('GEMINI_API_KEY') and GEMINI_AVAILABLE:
             return 'gemini'
-        elif os.getenv('ANTHROPIC_API_KEY') and ANTHROPIC_AVAILABLE:
+        elif get_secure_api_key('ANTHROPIC_API_KEY') and ANTHROPIC_AVAILABLE:
             return 'claude'
         else:
             return 'mock'
@@ -117,9 +120,9 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = os.getenv('OPENAI_API_KEY')
+        api_key = get_secure_api_key('OPENAI_API_KEY')
         if not api_key:
-            logger.warning("OPENAI_API_KEY not found, falling back to mock")
+            logger.warning("OPENAI_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
             return
         
@@ -137,15 +140,15 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = os.getenv('GEMINI_API_KEY')
+        api_key = get_secure_api_key('GEMINI_API_KEY')
         if not api_key:
-            logger.warning("GEMINI_API_KEY not found, falling back to mock")
+            logger.warning("GEMINI_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
             return
         
         try:
             genai.configure(api_key=api_key)
-            self.client = genai.GenerativeModel('gemini-pro')
+            self.client = genai.GenerativeModel(GEMINI_MODEL)
             logger.info("Gemini client initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Gemini: {e}")
@@ -158,9 +161,9 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = os.getenv('ANTHROPIC_API_KEY')
+        api_key = get_secure_api_key('ANTHROPIC_API_KEY')
         if not api_key:
-            logger.warning("ANTHROPIC_API_KEY not found, falling back to mock")
+            logger.warning("ANTHROPIC_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
             return
         
@@ -242,13 +245,13 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
         prompt = self._build_prompt(structured_data)
         
         response = self.client.chat.completions.create(
-            model=self.OPENAI_MODEL,
+            model=OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": self.SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,
-            max_tokens=300
+            temperature=LLM_TEMPERATURE,
+            max_tokens=MAX_TOKENS_LLM
         )
         
         # Validate response structure
@@ -281,8 +284,8 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
         prompt = self._build_prompt(structured_data)
         
         message = self.client.messages.create(
-            model=self.CLAUDE_MODEL,
-            max_tokens=300,
+            model=CLAUDE_MODEL,
+            max_tokens=MAX_TOKENS_LLM,
             system=self.SYSTEM_PROMPT,
             messages=[
                 {"role": "user", "content": prompt}
@@ -301,85 +304,112 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
         return message.content[0].text.strip()
     
     def _build_data_context(self, all_data: Dict) -> str:
-        """Build a comprehensive data context string from all available data."""
+        """
+        Build a comprehensive data context string from all available data.
+        
+        Args:
+            all_data: Dictionary with transactions, history, profile, and products
+            
+        Returns:
+            Formatted context string for LLM
+        """
         context_parts = []
         
-        # Add profile information
-        if 'profile' in all_data and all_data['profile']:
-            profile = all_data['profile']
-            context_parts.append(f"PERFIL DO USUÁRIO:")
-            context_parts.append(f"- Nome: {profile.get('nome', 'N/A')}")
-            context_parts.append(f"- Renda mensal: R$ {profile.get('renda_mensal', 0):.2f}")
-            context_parts.append(f"- Perfil de investidor: {profile.get('perfil_investidor', 'N/A')}")
-            context_parts.append(f"- Patrimônio total: R$ {profile.get('patrimonio_total', 0):.2f}")
-            context_parts.append(f"- Reserva de emergência: R$ {profile.get('reserva_emergencia_atual', 0):.2f}")
-            context_parts.append(f"- Aceita risco: {'Sim' if profile.get('aceita_risco', False) else 'Não'}")
-            
-            if 'metas' in profile and profile['metas']:
-                context_parts.append(f"- Metas financeiras:")
-                for goal in profile['metas']:
-                    context_parts.append(f"  * {goal.get('meta', 'N/A')}: R$ {goal.get('valor_necessario', 0):.2f} até {goal.get('prazo', 'N/A')}")
-            context_parts.append("")
-        
-        # Add transactions
-        if 'transactions' in all_data and all_data['transactions']:
-            transactions = all_data['transactions']
-            context_parts.append(f"TRANSAÇÕES RECENTES ({len(transactions)} registros):")
-            for tx in transactions[:20]:  # Limit to first 20 to avoid token overflow
-                context_parts.append(f"- {tx.get('data', 'N/A')}: {tx.get('descricao', 'N/A')} - {tx.get('categoria', 'N/A')} - R$ {tx.get('valor', 0):.2f} ({tx.get('tipo', 'N/A')})")
-            if len(transactions) > 20:
-                context_parts.append(f"... e mais {len(transactions) - 20} transações")
-            context_parts.append("")
-        
-        # Add service history
-        if 'history' in all_data and all_data['history']:
-            history = all_data['history']
-            context_parts.append(f"HISTÓRICO DE ATENDIMENTO ({len(history)} registros):")
-            for record in history[:10]:  # Limit to first 10
-                context_parts.append(f"- {record.get('data', 'N/A')}: {record.get('tema', 'N/A')} - {record.get('resumo', 'N/A')}")
-            if len(history) > 10:
-                context_parts.append(f"... e mais {len(history) - 10} atendimentos")
-            context_parts.append("")
-        
-        # Add products
-        if 'products' in all_data and all_data['products']:
-            products = all_data['products']
-            context_parts.append(f"PRODUTOS FINANCEIROS DISPONÍVEIS ({len(products)} produtos):")
-            for product in products:
-                context_parts.append(f"- {product.get('nome', 'N/A')} ({product.get('categoria', 'N/A')}, risco {product.get('risco', 'N/A')}): {product.get('indicado_para', 'N/A')}")
-            context_parts.append("")
+        # Add each data section
+        context_parts.extend(self._format_profile_context(all_data.get('profile', {})))
+        context_parts.extend(self._format_transactions_context(all_data.get('transactions', [])))
+        context_parts.extend(self._format_history_context(all_data.get('history', [])))
+        context_parts.extend(self._format_products_context(all_data.get('products', [])))
         
         return "\n".join(context_parts)
     
+    def _format_profile_context(self, profile: Dict) -> list:
+        """Format profile information for context."""
+        if not profile:
+            return []
+        
+        lines = ["PERFIL DO USUÁRIO:"]
+        lines.append(f"- Nome: {profile.get('nome', 'N/A')}")
+        lines.append(f"- Renda mensal: R$ {profile.get('renda_mensal', 0):.2f}")
+        lines.append(f"- Perfil de investidor: {profile.get('perfil_investidor', 'N/A')}")
+        lines.append(f"- Patrimônio total: R$ {profile.get('patrimonio_total', 0):.2f}")
+        lines.append(f"- Reserva de emergência: R$ {profile.get('reserva_emergencia_atual', 0):.2f}")
+        lines.append(f"- Aceita risco: {'Sim' if profile.get('aceita_risco', False) else 'Não'}")
+        
+        if 'metas' in profile and profile['metas']:
+            lines.append("- Metas financeiras:")
+            for goal in profile['metas']:
+                goal_str = f"  * {goal.get('meta', 'N/A')}: R$ {goal.get('valor_necessario', 0):.2f} até {goal.get('prazo', 'N/A')}"
+                lines.append(goal_str)
+        
+        lines.append("")
+        return lines
+    
+    def _format_transactions_context(self, transactions: list) -> list:
+        """Format transactions for context."""
+        if not transactions:
+            return []
+        
+        lines = [f"TRANSAÇÕES RECENTES ({len(transactions)} registros):"]
+        for tx in transactions[:MAX_TRANSACTIONS_DISPLAY]:
+            tx_str = (f"- {tx.get('data', 'N/A')}: {tx.get('descricao', 'N/A')} - "
+                     f"{tx.get('categoria', 'N/A')} - R$ {tx.get('valor', 0):.2f} "
+                     f"({tx.get('tipo', 'N/A')})")
+            lines.append(tx_str)
+        
+        if len(transactions) > MAX_TRANSACTIONS_DISPLAY:
+            lines.append(f"... e mais {len(transactions) - MAX_TRANSACTIONS_DISPLAY} transações")
+        
+        lines.append("")
+        return lines
+    
+    def _format_history_context(self, history: list) -> list:
+        """Format service history for context."""
+        if not history:
+            return []
+        
+        lines = [f"HISTÓRICO DE ATENDIMENTO ({len(history)} registros):"]
+        for record in history[:MAX_HISTORY_DISPLAY]:
+            record_str = (f"- {record.get('data', 'N/A')}: {record.get('tema', 'N/A')} - "
+                         f"{record.get('resumo', 'N/A')}")
+            lines.append(record_str)
+        
+        if len(history) > MAX_HISTORY_DISPLAY:
+            lines.append(f"... e mais {len(history) - MAX_HISTORY_DISPLAY} atendimentos")
+        
+        lines.append("")
+        return lines
+    
+    def _format_products_context(self, products: list) -> list:
+        """Format financial products for context."""
+        if not products:
+            return []
+        
+        lines = [f"PRODUTOS FINANCEIROS DISPONÍVEIS ({len(products)} produtos):"]
+        for product in products:
+            product_str = (f"- {product.get('nome', 'N/A')} "
+                          f"({product.get('categoria', 'N/A')}, risco {product.get('risco', 'N/A')}): "
+                          f"{product.get('indicado_para', 'N/A')}")
+            lines.append(product_str)
+        
+        lines.append("")
+        return lines
+    
     def _generate_dynamic_openai(self, user_query: str, all_data: Dict) -> str:
         """Generate dynamic response using OpenAI."""
-        data_context = self._build_data_context(all_data)
-        prompt = f"""{data_context}
-
-PERGUNTA DO USUÁRIO: {user_query}
-
-Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+        prompt = self._build_dynamic_prompt(user_query, all_data)
         
         response = self.client.chat.completions.create(
-            model=self.OPENAI_MODEL,
+            model=OPENAI_MODEL,
             messages=[
                 {"role": "system", "content": self.SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.3,
-            max_tokens=300
+            temperature=LLM_TEMPERATURE,
+            max_tokens=MAX_TOKENS_LLM
         )
         
-        if not response.choices or len(response.choices) == 0:
-            logger.warning("OpenAI returned empty choices")
-            return self._mock_dynamic_generate(user_query, all_data)
-        
-        content = response.choices[0].message.content
-        if not content:
-            logger.warning("OpenAI returned empty content")
-            return self._mock_dynamic_generate(user_query, all_data)
-        
-        return content.strip()
+        return self._extract_openai_response(response, user_query, all_data)
     
     def _generate_dynamic_gemini(self, user_query: str, all_data: Dict) -> str:
         """Generate dynamic response using Gemini."""
@@ -402,22 +432,43 @@ Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
     
     def _generate_dynamic_claude(self, user_query: str, all_data: Dict) -> str:
         """Generate dynamic response using Claude."""
-        data_context = self._build_data_context(all_data)
-        prompt = f"""{data_context}
-
-PERGUNTA DO USUÁRIO: {user_query}
-
-Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+        prompt = self._build_dynamic_prompt(user_query, all_data)
         
         message = self.client.messages.create(
-            model=self.CLAUDE_MODEL,
-            max_tokens=300,
+            model=CLAUDE_MODEL,
+            max_tokens=MAX_TOKENS_LLM,
             system=self.SYSTEM_PROMPT,
             messages=[
                 {"role": "user", "content": prompt}
             ]
         )
         
+        return self._extract_claude_response(message, user_query, all_data)
+    
+    def _build_dynamic_prompt(self, user_query: str, all_data: Dict) -> str:
+        """Build prompt for dynamic response generation."""
+        data_context = self._build_data_context(all_data)
+        return f"""{data_context}
+
+PERGUNTA DO USUÁRIO: {user_query}
+
+Responda com base exclusivamente nos dados acima. Máximo 2-3 frases."""
+    
+    def _extract_openai_response(self, response, user_query: str, all_data: Dict) -> str:
+        """Extract and validate OpenAI response."""
+        if not response.choices or len(response.choices) == 0:
+            logger.warning("OpenAI returned empty choices")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        content = response.choices[0].message.content
+        if not content:
+            logger.warning("OpenAI returned empty content")
+            return self._mock_dynamic_generate(user_query, all_data)
+        
+        return content.strip()
+    
+    def _extract_claude_response(self, message, user_query: str, all_data: Dict) -> str:
+        """Extract and validate Claude response."""
         if not message.content or len(message.content) == 0:
             logger.warning("Claude returned empty content")
             return self._mock_dynamic_generate(user_query, all_data)
