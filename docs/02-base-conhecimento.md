@@ -63,19 +63,21 @@ O carregamento acontece uma vez e os dados ficam em memória durante a sessão d
 
 ### Como os dados são usados no prompt?
 
-**Não há prompt tradicional de LLM**. O agente utiliza **lógica determinística** baseada em regras:
+O agente utiliza **arquitetura dinâmica com LLM** para análise e geração de respostas:
 
-1. **Análise de query**: Identifica palavras-chave (gastos, alerta, meta, produto)
-2. **Consulta de dados**: Acessa DataFrames/JSON carregados
-3. **Aplicação de regras**: 
-   - Aumento de gastos: Compara últimos N dias com período anterior
-   - Recorrências: Agrupa por categoria e conta ocorrências
-   - Metas: Calcula valor mensal = valor_objetivo / prazo_meses
-   - Produtos: Filtra por nível de risco compatível
-4. **Geração de resposta**: Template de texto com dados calculados
-5. **Validação**: Garante máximo 2 frases
+1. **Preparação de contexto**: Todos os dados são formatados em texto estruturado
+2. **Envio ao LLM**: 
+   - System prompt define regras de comportamento
+   - Contexto inclui: perfil completo, todas as transações, histórico de atendimento e produtos disponíveis
+   - Pergunta do usuário em linguagem natural
+3. **Análise pelo LLM**: 
+   - Interpreta livremente a pergunta do usuário
+   - Analisa os dados relevantes para responder
+   - Gera resposta baseada exclusivamente nos dados fornecidos
+4. **Validação**: Garante máximo 6 frases (2-3 parágrafos curtos)
+5. **Fallback determinístico**: Quando LLM não disponível, usa matching de palavras-chave
 
-Este approach garante **zero alucinação** pois não há geração de texto por IA.
+Este approach combina **flexibilidade de análise** com **segurança de dados** através de system prompt restritivo que proíbe invenção de informações.
 
 ### Fontes Documentadas
 
@@ -90,48 +92,65 @@ Cada resposta inclui lista de fontes no formato:
 
 ### Query: "Quanto gastei este mês?"
 
-**Dados consultados:**
-```python
-expenses = transactions[transactions['tipo'] == 'saida']
-recent = expenses[expenses['data'] >= cutoff_date]
-total = recent['valor'].sum()
-top_category = recent.groupby('categoria')['valor'].sum().idxmax()
+**Contexto enviado ao LLM:**
+```
+PERFIL DO USUÁRIO:
+- Nome: João Silva
+- Renda mensal: R$ 5000.00
+...
+
+TRANSAÇÕES RECENTES (50 registros):
+- 2025-10-01: Salário - receita - R$ 5000.00 (entrada)
+- 2025-10-02: Aluguel - moradia - R$ 1200.00 (saida)
+- 2025-10-03: Supermercado - alimentacao - R$ 450.00 (saida)
+...
+
+PERGUNTA DO USUÁRIO: Quanto gastei este mês?
 ```
 
-**Resposta gerada:**
+**Resposta gerada pelo LLM:**
 ```
-"Você gastou R$ 2.289,90 nos últimos 30 dias. 
-Maior categoria: moradia (R$ 1.380,00)."
+"Analisando suas transações de outubro, você gastou R$ 2.488,90. 
+As maiores categorias foram moradia (R$ 1.380,00) e alimentação (R$ 570,00)."
 ```
 
-**Fontes:**
+**Fontes extraídas:**
 ```
-["transacoes.csv:data,tipo,categoria,valor"]
+["transacoes.csv"]
 ```
 
 ---
 
 ### Query: "Que produto você recomenda?"
 
-**Dados consultados:**
-```python
-profile_type = profile['perfil_investidor']  # "moderado"
-accepts_risk = profile['aceita_risco']        # false
-target_risk = "baixo"                         # mapeamento
-suitable = [p for p in products if p['risco'] == target_risk]
+**Contexto enviado ao LLM:**
+```
+PERFIL DO USUÁRIO:
+- Nome: João Silva
+- Perfil de investidor: moderado
+- Aceita risco: Não
+...
+
+PRODUTOS FINANCEIROS DISPONÍVEIS (5 produtos):
+- Tesouro Selic (renda_fixa, risco baixo): Reserva de emergência e iniciantes
+- CDB Liquidez Diária (renda_fixa, risco baixo): Quem busca segurança com rendimento diário
+- Fundo DI (fundo, risco baixo): Iniciantes e reserva de emergência
+...
+
+PERGUNTA DO USUÁRIO: Que produto você recomenda?
 ```
 
-**Resposta gerada:**
+**Resposta gerada pelo LLM:**
 ```
-"Com perfil moderado, considere 'Tesouro Selic'. 
-Indicado para reserva de emergência e iniciantes."
+"Considerando seu perfil moderado que não aceita alto risco, recomendo o Tesouro Selic. 
+É indicado para reserva de emergência e iniciantes."
 ```
 
-**Fontes:**
+**Fontes extraídas:**
 ```
 [
-  "perfil_investidor.json:perfil_investidor,aceita_risco",
-  "produtos_financeiros.json:nome,risco,indicado_para"
+  "perfil_investidor.json",
+  "produtos_financeiros.json"
 ]
 ```
 

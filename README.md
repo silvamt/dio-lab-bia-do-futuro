@@ -2,14 +2,14 @@
 
 ## Contexto
 
-**Moara (MOARA – Modular Orchestrated AI for Responsible Advisory - IA Orquestrada Modular para Aconselhamento Responsável)** é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Com interface mobile-first inspirada no WhatsApp, Moara oferece:
+**Moara (MOARA – Modular Orchestrated AI for Responsible Advisory - IA Orquestrada Modular para Aconselhamento Responsável)** é um agente financeiro proativo que utiliza IA generativa controlada por system prompt restritivo para analisar seus dados e responder perguntas, oferecendo clareza e transparência na gestão financeira. Com interface mobile-first inspirada no WhatsApp, Moara oferece:
 
 - 📊 **Análise proativa de gastos** - Detecta aumentos atípicos automaticamente
 - 🔔 **Alertas inteligentes** - Identifica recorrências e oportunidades de economia
 - 🎯 **Planejamento de metas** - Calcula valores mensais para seus objetivos
 - 💼 **Sugestões personalizadas** - Produtos adequados ao seu perfil de investidor
-- 🤖 **IA Responsável** - LLM usado apenas para linguagem natural, decisões são determinísticas
-- 🔒 **Segurança garantida** - Sem alucinações, apenas dados reais
+- 🤖 **IA Responsável** - LLM controlado por prompt restritivo, respostas baseadas apenas em dados reais
+- 🔒 **Segurança garantida** - System prompt proíbe invenção de dados, validação automática de respostas
 
 ## 🚀 Como Executar
 
@@ -31,7 +31,7 @@ pip install -r requirements.txt
 streamlit run src/app.py
 
 # Opcional: Configure chave de API para LLM (OpenAI, Gemini ou Claude)
-# O sistema funciona sem chave, usando fallback determinístico
+# O sistema funciona sem chave, usando fallback com matching de palavras-chave
 export OPENAI_API_KEY="sua-chave-aqui"
 # ou
 export GEMINI_API_KEY="sua-chave-aqui"
@@ -43,10 +43,10 @@ O aplicativo será aberto automaticamente no navegador em `http://localhost:8501
 
 > [!NOTE]
 > A aplicação funciona perfeitamente **sem chaves de API**. O LLM é usado opcionalmente para:
-> - **Classificação de intenções**: Entende melhor mensagens em linguagem natural (ex: "tô gastando demais" → alertas)
-> - **Verbalização**: Transforma dados estruturados em linguagem natural
+> - **Análise dinâmica**: Interpreta livremente perguntas e analisa todos os dados disponíveis
+> - **Respostas flexíveis**: Responde qualquer pergunta sobre os dados, não limitado a 5-6 tipos fixos
 > 
-> Sem chave de API, o sistema usa matching de palavras-chave e mensagens pré-formatadas determinísticas.
+> Sem chave de API, o sistema usa fallback com matching de palavras-chave e respostas básicas pré-formatadas.
 
 ## 💬 Exemplos de Uso
 
@@ -82,7 +82,7 @@ Experimente perguntar à Moara (funciona com ou sem API key):
 - **Sugestões personalizadas**: Produtos adequados ao seu perfil
 
 ### UX Mobile-First
-- **Respostas curtas**: Máximo 2 frases na resposta principal
+- **Respostas concisas**: Máximo 6 frases (2-3 parágrafos curtos) na resposta principal
 - **Interface WhatsApp**: Bolhas de chat e entrada fixada no rodapé
 - **Detalhes sob demanda**: Botão "Ver detalhes" para informações estendidas
 - **Justificativas transparentes**: Cada resposta indica a fonte dos dados
@@ -146,7 +146,7 @@ Os seguintes arquivos estão em [`data/`](./data/):
 └── 📁 src/                            # Código da aplicação
     ├── app.py                         # Aplicação Streamlit (main)
     ├── agent.py                       # Lógica do agente financeiro
-    ├── llm_adapter.py                 # Adaptador LLM (NLG)
+    ├── llm_adapter.py                 # Adaptador LLM (múltiplos provedores)
     ├── data_loader.py                 # Carregamento e validação de dados
     └── response_validator.py          # Validação de respostas (UX)
 ```
@@ -157,11 +157,10 @@ Os seguintes arquivos estão em [`data/`](./data/):
 
 ### Estratégias Anti-Alucinação
 - ✅ Respostas baseadas **exclusivamente** nos dados mockados
-- ✅ Validação automática do tamanho das respostas (max 2 frases)
+- ✅ **System prompt restritivo** proíbe LLM de criar informações além dos dados
+- ✅ Validação automática do tamanho das respostas (max 6 frases)
 - ✅ Fontes sempre documentadas e visíveis ao usuário
 - ✅ Quando não há dados, o agente admite a limitação
-- ✅ **LLM usado apenas como NLG**, não para decisões
-- ✅ **System prompt restritivo** proíbe criação de informações
 - ✅ **Fallback determinístico** quando LLM indisponível
 
 ### O Que Moara NÃO Faz
@@ -178,22 +177,24 @@ Os seguintes arquivos estão em [`data/`](./data/):
 - **Streamlit** - Interface web interativa
 - **Pandas** - Manipulação de dados
 - **Python 3.8+** - Linguagem de programação
-- **OpenAI/Gemini/Claude** - LLM para NLG (opcional)
+- **OpenAI/Gemini/Claude** - LLM para análise e geração de respostas (opcional)
 
 ## 🤖 Uso de IA Generativa
 
 Este projeto demonstra **uso responsável de IA generativa**:
 
-- **Decisões financeiras**: 100% determinísticas (cálculos, validações, alertas)
-- **Classificação de intenções (opcional)**: LLM usado para entender linguagem natural
-  - Valida estritamente a saída do LLM (JSON com campos obrigatórios)
-  - Fallback automático para matching de palavras-chave se LLM falhar
-  - Threshold de confiança mínimo de 0.7
-- **Geração de linguagem**: LLM usado apenas para verbalizar dados estruturados
-- **Governança**: System prompts restritivos impedem criação de informações
-- **Fallback**: Sistema funciona sem LLM, usando mensagens pré-formatadas
+- **Análise de dados**: LLM recebe todos os dados financeiros e interpreta livremente a pergunta do usuário
+- **System prompt restritivo**: Proíbe o LLM de inventar valores, transações ou produtos
+  - "Use APENAS as informações presentes nos dados fornecidos"
+  - "NUNCA invente valores, transações ou produtos que não existam nos dados"
+- **Validação de tamanho**: Respostas limitadas a 6 frases para UX mobile-first
+- **Governança**: Múltiplas camadas de controle garantem segurança
+  - System prompt com regras explícitas
+  - Validação pós-resposta
+  - Fontes documentadas
+- **Fallback**: Sistema funciona sem LLM, usando matching de palavras-chave
 
-Esta arquitetura garante **zero alucinação de valores** enquanto melhora **naturalidade na comunicação**.
+Esta arquitetura garante **zero alucinação de valores** enquanto permite **flexibilidade para interpretar qualquer pergunta** sobre os dados disponíveis.
 
 ---
 

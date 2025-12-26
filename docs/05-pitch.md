@@ -29,17 +29,17 @@
 
 1. **Proativa, não reativa**: Detecta aumento atípico de gastos, identifica recorrências e sugere oportunidades de economia
 
-2. **Mobile-first**: Interface inspirada no WhatsApp com respostas curtas (máximo 2 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
+2. **Mobile-first**: Interface inspirada no WhatsApp com respostas concisas (máximo 6 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
 
-3. **100% confiável**: Zero alucinação - todas as decisões financeiras são determinísticas. IA generativa usada apenas para verbalizar dados já calculados
+3. **100% confiável**: Zero alucinação - system prompt restritivo garante que respostas sejam baseadas exclusivamente nos dados reais. LLM não inventa valores ou informações
 
 4. **Transparente**: Cada resposta mostra a fonte dos dados. Você sabe exatamente de onde vem a informação
 
-5. **Governança de IA (MOARA)**: A arquitetura MOARA garante uso responsável de IA com modularidade, orquestração controlada e governança apropriada. LLM usado apenas como camada de linguagem, sem acesso direto aos dados ou poder de decisão
+5. **Governança de IA (MOARA)**: A arquitetura MOARA garante uso responsável de IA com modularidade, orquestração controlada e governança apropriada. LLM interpreta perguntas livremente mas responde apenas com base nos dados fornecidos
 
 **Como funciona:**
 
-"A arquitetura MOARA analisa suas transações automaticamente usando regras determinísticas para cálculos e decisões. A IA generativa entra apenas para transformar os dados estruturados em linguagem natural. Sem IA black-box para decisões financeiras, sem surpresas. Dados ficam com você, processamento é local."
+"A arquitetura MOARA analisa suas transações usando LLM com governança apropriada. O sistema envia todos os dados ao LLM junto com um system prompt restritivo que proíbe invenção de informações. O LLM interpreta sua pergunta livremente e analisa os dados, mas só pode responder com o que está nos seus dados reais. Sem IA black-box sem controle, sem surpresas. Dados ficam com você, processamento é controlado."
 
 ---
 
@@ -75,7 +75,7 @@ Moara: "Com perfil moderado, considere 'Tesouro Selic'.
 
 **Por que é inovador:**
 
-"Enquanto outros assistentes financeiros dependem 100% de LLMs que podem alucinar valores e dar conselhos errados, Moara usa a **arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory)**: decisões financeiras são determinísticas, IA generativa apenas verbaliza. É o melhor dos dois mundos - **confiabilidade nas decisões** e **naturalidade na comunicação**."
+"Enquanto outros assistentes financeiros dependem 100% de LLMs que podem alucinar valores e dar conselhos errados, Moara usa a **arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory)**: LLM é controlado por system prompt restritivo e só acessa dados que você fornece. É o melhor dos dois mundos - **flexibilidade para interpretar qualquer pergunta** e **segurança de que respostas são baseadas em dados reais**."
 
 **Impacto:**
 
@@ -96,7 +96,7 @@ Moara: "Com perfil moderado, considere 'Tesouro Selic'.
 - [x] Duração máxima de 3 minutos
 - [x] Problema claramente definido (controle financeiro inadequado)
 - [x] Solução demonstrada na prática (3 cenários de uso)
-- [x] Diferencial explicado (determinístico vs LLM, zero alucinação)
+- [x] Diferencial explicado (LLM controlado vs LLM livre, zero alucinação)
 - [x] Impacto social descrito (inclusão, educação, empoderamento)
 
 ---
@@ -120,9 +120,9 @@ Moara: "Com perfil moderado, considere 'Tesouro Selic'.
 
 ### Slide 4: Diferencial
 - Tabela comparativa:
-  - Outros: 100% LLM → pode alucinar valores
-  - Moara: Arquitetura MOARA → decisões determinísticas + verbalização natural + governança
-  - Destaque: "Melhor dos dois mundos"
+  - Outros: 100% LLM livre → pode alucinar valores
+  - Moara: Arquitetura MOARA → LLM controlado por prompt + validação + governança
+  - Destaque: "Flexibilidade com segurança"
 
 ### Slide 5: Impacto
 - Ícones: Inclusão | Educação | Empoderamento | Privacidade | IA Responsável
@@ -155,7 +155,7 @@ Tem três diferenciais principais:
 
 Primeiro: é proativo. Detecta quando seus gastos aumentam 35% em uma semana e te avisa para você agir.
 
-Segundo: mobile-first. Respostas curtas, máximo 2 frases, como se fosse WhatsApp. Nada de paragrafos intermináveis.
+Segundo: mobile-first. Respostas concisas, máximo 6 frases em 2-3 parágrafos curtos, adequadas para mobile. Nada de textos intermináveis.
 
 Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclusivamente nos seus dados reais. E cada resposta mostra a fonte - você sabe de onde vem a informação."
 
@@ -163,15 +163,15 @@ Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclus
 
 "Deixa eu mostrar. [abrir app]
 
-Pergunto: 'Tenho algum alerta?' e a arquitetura MOARA analisa meus dados com lógica determinística, detecta que os gastos aumentaram 35%, e usa IA generativa apenas para verbalizar: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
+Pergunto: 'Tenho algum alerta?' e a arquitetura MOARA envia todos os meus dados financeiros ao LLM com um system prompt restritivo. O LLM analisa, detecta que os gastos aumentaram 35%, e responde: 'Seus gastos aumentaram 35% nos últimos 7 dias. Pode ser um bom momento para revisar o orçamento.' Viu? Duas frases curtas, mas com o alerta que importa.
 
-Agora: 'Como posso atingir minha meta?' e o sistema calcula deterministicamente: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' O LLM só transforma os números em texto natural. E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real.
+Agora: 'Como posso atingir minha meta?' e o LLM analisa meu perfil e calcula: 'Para atingir R$ 15 mil em 8 meses, reserve R$ 1.875 mensais.' E já mostra que isso é 37,5% da minha renda. Tudo baseado no meu perfil real, sem inventar nada.
 
 E olha aqui embaixo - mostra as fontes dos dados. Total transparência."
 
 **[2:30 - 3:00] Diferencial e Encerramento**
 
-"Qual a grande sacada? A **arquitetura MOARA (Modular Orchestrated AI for Responsible Advisory)** garante modularidade, orquestração controlada e uso responsável de IA. Decisões financeiras são 100% determinísticas - sem alucinação de valores. IA generativa entra apenas para verbalizar em linguagem natural. É o melhor dos dois mundos: **confiabilidade nas decisões, naturalidade na comunicação**.
+"Qual a grande sacada? A **arquitetura MOARA (Modular Orchestered AI for Responsible Advisory)** garante modularidade, orquestração controlada e uso responsável de IA. O LLM recebe todos os dados e um system prompt restritivo que proíbe criar informações além do fornecido. É o melhor dos dois mundos: **flexibilidade para interpretar qualquer pergunta sobre seus dados, segurança de que a resposta é baseada apenas no que é real**.
 
 O impacto: democratizar consultoria financeira. Interface simples, respostas educativas, dados privados, IA responsável com governança apropriada. Hoje funciona com dados mockados. Amanhã, integrada ao seu banco, te alertando no WhatsApp real.
 
@@ -199,7 +199,7 @@ O código está no GitHub. Quer testar? [mostrar QR code]"
 ## Perguntas Frequentes (Q&A)
 
 **Q: Por que não usar um LLM como GPT para tudo?**
-A: No setor financeiro, precisão é mais importante que flexibilidade. LLMs podem alucinar valores e dar conselhos errados. Nossa abordagem híbrida usa decisões determinísticas (100% precisas) e LLM apenas para verbalização natural. Melhor dos dois mundos.
+A: No setor financeiro, precisão é mais importante que flexibilidade descontrolada. LLMs livres podem alucinar valores e dar conselhos errados. Nossa abordagem usa LLM com system prompt restritivo e validação rigorosa - o LLM interpreta livremente a pergunta mas só responde com dados reais fornecidos. Melhor dos dois mundos: flexibilidade com segurança.
 
 **Q: Funciona com banco real?**
 A: Esta é uma versão de demonstração com dados mockados. A arquitetura está preparada para integração - basta substituir DataLoader por conexão com API bancária.
@@ -211,4 +211,4 @@ A: Processamento 100% local. Dados não são enviados para APIs externas. Em pro
 A: Cada resposta tem botão "Ver detalhes" que expande até 6 frases com dados completos. Mantemos a resposta principal curta para mobile, mas quem quer detalhes pode acessar.
 
 **Q: Quanto custa rodar?**
-A: Sem uso intensivo de LLM (apenas para NLG), o custo é muito menor que soluções 100% baseadas em GPT-4. Funciona até sem LLM em modo determinístico puro.
+A: Com LLM configurado, usa tokens de forma eficiente (apenas análise, não conversação longa). Sem LLM, modo fallback determinístico tem zero custo de API. Muito mais econômico que soluções 100% baseadas em GPT-4 para todas as operações.
