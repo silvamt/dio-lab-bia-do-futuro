@@ -49,6 +49,24 @@ class LLMAdapter:
     It does NOT make financial decisions, calculate values, or infer information.
     """
     
+    # System prompt for message classifier
+    CLASSIFIER_PROMPT = """Você é um classificador de mensagens de usuário.
+Sua única tarefa é classificar a mensagem recebida em um dos três estados abaixo e responder SOMENTE com um dos valores: -1, 0 ou 1. Não escreva mais nada.
+
+Estados:
+
+* -1 (inválida ou insuficiente): mensagem vazia, apenas espaços ou genérica sem conteúdo útil, como: 'nada', 'não sei', 'nao sei', 'ok', '.', '-', '...', 'tanto faz', 'qualquer coisa'.
+* 0 (saudação): apenas cumprimento ou abertura social, sem conteúdo financeiro, como: 'oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'eai'.
+* 1 (válida): qualquer intenção, pergunta ou informação financeira, mesmo que parcial, como objetivo, prazo, risco, valor, renda ou dívida. Exemplos: 'quero investir', 'reserva de emergência', 'curto prazo', 'risco médio', 'tenho 10 mil', 'cartão atrasado'.
+
+Regras:
+
+* Se houver qualquer intenção ou pergunta financeira, retorne 1, mesmo que comece com saudação.
+* Se for apenas saudação, retorne 0.
+* Se não houver conteúdo útil nem intenção financeira, retorne -1.
+* Nunca explique sua decisão.
+* Nunca retorne texto adicional."""
+    
     # System prompt for dynamic financial analysis
     SYSTEM_PROMPT = """Você é Moara, um analista financeiro pessoal proativo.
 
@@ -560,3 +578,178 @@ Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a
     def get_provider(self) -> str:
         """Get the current provider name."""
         return self.provider
+    
+    def classify_user_message(self, text: str) -> int:
+        """
+        Classify user message into one of three categories.
+        
+        This is a FIRST CALL that classifies the message without generating a response.
+        It only returns an integer classification value.
+        
+        Args:
+            text: User's message text
+            
+        Returns:
+            -1: Invalid or insufficient message
+             0: Greeting only (no financial content)
+             1: Valid message with financial intent (triggers agent)
+        """
+        if self.provider == 'mock':
+            return self._mock_classify(text)
+        
+        try:
+            if self.provider == 'openai':
+                return self._classify_openai(text)
+            elif self.provider == 'gemini':
+                return self._classify_gemini(text)
+            elif self.provider == 'claude':
+                return self._classify_claude(text)
+        except Exception as e:
+            logger.error(f"Classification failed: {e}, defaulting to -1")
+            return -1
+        
+        return -1
+    
+    def _classify_openai(self, text: str) -> int:
+        """Classify message using OpenAI."""
+        try:
+            response = self.client.chat.completions.create(
+                model=OPENAI_MODEL,
+                messages=[
+                    {"role": "system", "content": self.CLASSIFIER_PROMPT},
+                    {"role": "user", "content": text}
+                ],
+                temperature=0.0,  # Deterministic for classification
+                max_tokens=10  # Only need a single digit
+            )
+            
+            if not response.choices or len(response.choices) == 0:
+                logger.warning("OpenAI classification returned empty choices")
+                return -1
+            
+            content = response.choices[0].message.content
+            if not content:
+                logger.warning("OpenAI classification returned empty content")
+                return -1
+            
+            return self._parse_classification(content.strip())
+        except Exception as e:
+            logger.error(f"OpenAI classification error: {e}")
+            return -1
+    
+    def _classify_gemini(self, text: str) -> int:
+        """Classify message using Gemini."""
+        try:
+            prompt = f"{self.CLASSIFIER_PROMPT}\n\nMensagem: {text}"
+            response = self.client.generate_content(prompt)
+            
+            if not hasattr(response, 'text') or not response.text:
+                logger.warning("Gemini classification returned no text")
+                return -1
+            
+            return self._parse_classification(response.text.strip())
+        except Exception as e:
+            logger.error(f"Gemini classification error: {e}")
+            return -1
+    
+    def _classify_claude(self, text: str) -> int:
+        """Classify message using Claude."""
+        try:
+            message = self.client.messages.create(
+                model=CLAUDE_MODEL,
+                max_tokens=10,  # Only need a single digit
+                system=self.CLASSIFIER_PROMPT,
+                messages=[
+                    {"role": "user", "content": text}
+                ]
+            )
+            
+            if not message.content or len(message.content) == 0:
+                logger.warning("Claude classification returned empty content")
+                return -1
+            
+            if not hasattr(message.content[0], 'text') or not message.content[0].text:
+                logger.warning("Claude classification has no text")
+                return -1
+            
+            return self._parse_classification(message.content[0].text.strip())
+        except Exception as e:
+            logger.error(f"Claude classification error: {e}")
+            return -1
+    
+    def _parse_classification(self, response: str) -> int:
+        """
+        Safely parse classification response.
+        Only accepts "-1", "0", or "1" as valid responses.
+        
+        Args:
+            response: String response from LLM
+            
+        Returns:
+            -1, 0, or 1 (defaults to -1 for any invalid response)
+        """
+        response = response.strip()
+        if response == "-1":
+            return -1
+        elif response == "0":
+            return 0
+        elif response == "1":
+            return 1
+        else:
+            logger.warning(f"Invalid classification response: {response}, defaulting to -1")
+            return -1
+    
+    def _mock_classify(self, text: str) -> int:
+        """
+        Deterministic fallback classification when no LLM is available.
+        Uses simple keyword matching.
+        
+        Args:
+            text: User's message text
+            
+        Returns:
+            -1, 0, or 1
+        """
+        text_lower = text.strip().lower()
+        
+        # Check for invalid/insufficient
+        invalid_phrases = ['nada', 'não sei', 'nao sei', 'ok', 'tanto faz', 'qualquer coisa']
+        if not text_lower or text_lower in ['.', '-', '...'] or text_lower in invalid_phrases:
+            return -1
+        
+        # Financial keywords
+        financial_keywords = [
+            'investir', 'investimento', 'reserva', 'emergência', 'emergencia',
+            'prazo', 'risco', 'renda', 'dívida', 'divida', 'cartão', 'cartao',
+            'gasto', 'despesa', 'quanto', 'valor', 'real', 'reais', 'r$',
+            'meta', 'objetivo', 'poupar', 'guardar', 'aplicar', 'produto',
+            'transação', 'transacao', 'saldo', 'conta', 'pagar', 'pago',
+            'débito', 'debito', 'crédito', 'credito', 'financeiro', 'financeira',
+            'mil', 'milhão', 'milhao', 'dinheiro', 'economizar'
+        ]
+        
+        # Check for financial content
+        if any(keyword in text_lower for keyword in financial_keywords):
+            return 1
+        
+        # Greeting keywords
+        greeting_keywords = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'eai', 'hey', 'ola']
+        
+        # Pure greeting (no other content)
+        if any(text_lower.startswith(greeting) for greeting in greeting_keywords):
+            # Check if there's more content after greeting
+            for greeting in greeting_keywords:
+                if text_lower.startswith(greeting):
+                    remaining = text_lower[len(greeting):].strip()
+                    # If there's significant content after greeting, classify as financial if it matches
+                    if remaining and len(remaining) > 3:
+                        if any(keyword in remaining for keyword in financial_keywords):
+                            return 1
+                        else:
+                            return 0
+                    else:
+                        # Just greeting
+                        return 0
+        
+        # If not clearly greeting or financial, treat as valid (1) to let agent handle it
+        return 1

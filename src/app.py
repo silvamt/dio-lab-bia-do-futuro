@@ -182,7 +182,34 @@ def process_user_input(user_input: str):
     # Add user message
     add_message("user", sanitized_input)
     
-    # Get agent response using new dynamic approach
+    # FIRST CALL: Classify the message
+    try:
+        classification = st.session_state.llm_adapter.classify_user_message(sanitized_input)
+        logger.info(f"Message classified as: {classification}")
+        
+        # Handle classification results
+        if classification == -1:
+            # Invalid or insufficient message
+            response = ("Olá! Sou a Moara, sua assistente financeira. Posso te ajudar a entender seus gastos, "
+                       "planejar objetivos financeiros, analisar suas transações e recomendar produtos adequados "
+                       "ao seu perfil. Como posso te ajudar hoje?")
+            add_message("assistant", response)
+            return
+        
+        elif classification == 0:
+            # Greeting only
+            name = st.session_state.user_name
+            response = f"Olá, {name}! Como posso te ajudar com suas finanças hoje?"
+            add_message("assistant", response)
+            return
+        
+        # classification == 1: Valid financial message, proceed with agent
+        
+    except Exception as e:
+        logger.error(f"Classification error: {e}, treating as valid message")
+        # On classification error, treat as valid to avoid blocking user
+    
+    # SECOND CALL: Get agent response using existing dynamic approach
     try:
         # Defensive unpacking to handle edge cases
         result = st.session_state.agent.answer_query(sanitized_input)
