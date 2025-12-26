@@ -4,14 +4,16 @@ Ensures responses adhere to mobile-first UX requirements.
 """
 
 import re
+import logging
 from typing import Tuple
+
+from constants import MAX_SENTENCES_RESPONSE
+
+logger = logging.getLogger(__name__)
 
 
 class ResponseValidator:
     """Validates and adjusts agent responses for mobile UX."""
-    
-    # Maximum sentences allowed in response (2-3 short paragraphs, ~2 sentences each)
-    MAX_TOTAL_SENTENCES = 6
     
     @staticmethod
     def count_sentences(text: str) -> int:
@@ -43,7 +45,8 @@ class ResponseValidator:
         """
         Validate that response meets length requirements.
         
-        For Moara, we allow up to 10 sentences (equivalent to 2-3 short paragraphs).
+        For Moara, we allow up to MAX_SENTENCES_RESPONSE sentences 
+        (equivalent to 2-3 short paragraphs).
         
         Args:
             response: Response text to validate
@@ -58,15 +61,32 @@ class ResponseValidator:
         # Count sentences - this is the primary constraint
         sentence_count = ResponseValidator.count_sentences(response)
         
-        # For Moara, we allow up to 10 sentences (2-3 short paragraphs)
-        max_sentences = ResponseValidator.MAX_TOTAL_SENTENCES
+        # For Moara, we allow up to MAX_SENTENCES_RESPONSE sentences (2-3 short paragraphs)
+        max_sentences = MAX_SENTENCES_RESPONSE
         
         if sentence_count <= max_sentences:
             return True, response
         
         # Response is too long, truncate to max sentences
+        logger.warning(f"Response too long ({sentence_count} sentences), truncating to {max_sentences}")
+        adjusted = ResponseValidator._truncate_to_sentences(response, max_sentences)
+        
+        return False, adjusted
+    
+    @staticmethod
+    def _truncate_to_sentences(text: str, max_sentences: int) -> str:
+        """
+        Truncate text to a maximum number of sentences.
+        
+        Args:
+            text: Text to truncate
+            max_sentences: Maximum number of sentences to keep
+            
+        Returns:
+            Truncated text
+        """
         # Use same logic as count_sentences to properly identify sentence boundaries
-        text_clean = re.sub(r'\d+\.\d+', 'NUM', response.strip())
+        text_clean = re.sub(r'\d+\.\d+', 'NUM', text.strip())
         
         # Find sentence boundaries in cleaned text
         sentences_clean = re.split(r'([.!?]+\s+|[.!?]+$)', text_clean)
@@ -75,7 +95,7 @@ class ResponseValidator:
         result = []
         sentence_counter = 0
         pos = 0
-        original = response.strip()
+        original = text.strip()
         
         for i in range(0, len(sentences_clean), 2):
             if sentence_counter >= max_sentences:
@@ -84,11 +104,7 @@ class ResponseValidator:
             sentence_clean = sentences_clean[i].strip()
             if sentence_clean:
                 # Find next sentence-ending punctuation in original text
-                next_punct = -1
-                for punct in ['.', '!', '?']:
-                    idx = original.find(punct, pos)
-                    if idx != -1 and (next_punct == -1 or idx < next_punct):
-                        next_punct = idx
+                next_punct = ResponseValidator._find_next_punctuation(original, pos)
                 
                 if next_punct != -1:
                     # Include text up to and including punctuation
@@ -99,9 +115,26 @@ class ResponseValidator:
                         pos += 1
                     sentence_counter += 1
         
-        adjusted = ' '.join(result).strip()
+        return ' '.join(result).strip()
+    
+    @staticmethod
+    def _find_next_punctuation(text: str, start_pos: int) -> int:
+        """
+        Find the position of the next sentence-ending punctuation.
         
-        return False, adjusted
+        Args:
+            text: Text to search
+            start_pos: Position to start searching from
+            
+        Returns:
+            Position of next punctuation, or -1 if not found
+        """
+        next_punct = -1
+        for punct in ['.', '!', '?']:
+            idx = text.find(punct, start_pos)
+            if idx != -1 and (next_punct == -1 or idx < next_punct):
+                next_punct = idx
+        return next_punct
     
     @staticmethod
     def format_sources(sources: list) -> str:

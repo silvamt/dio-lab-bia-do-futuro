@@ -6,12 +6,16 @@ Uses LLM as NLG layer to verbalize structured responses.
 
 import streamlit as st
 import logging
+from datetime import datetime
+
 from data_loader import DataLoader
 from agent import FinancialAgent
 from response_validator import ResponseValidator
 from llm_adapter import LLMAdapter
-from datetime import datetime
+from security_utils import sanitize_user_input
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -24,6 +28,8 @@ st.set_page_config(
 )
 
 # Custom CSS for WhatsApp-like chat interface
+# Note: This uses unsafe_allow_html but is safe because the CSS is static
+# and doesn't incorporate any user input or dynamic content
 st.markdown("""
 <style>
     /* Main container */
@@ -166,13 +172,21 @@ def display_message(message: dict):
 
 def process_user_input(user_input: str):
     """Process user input and generate agent response."""
+    # Security: Sanitize user input
+    try:
+        sanitized_input = sanitize_user_input(user_input)
+    except ValueError as e:
+        logger.warning(f"Invalid user input: {e}")
+        add_message("assistant", f"Desculpe, sua mensagem não pôde ser processada. {str(e)}")
+        return
+    
     # Add user message
-    add_message("user", user_input)
+    add_message("user", sanitized_input)
     
     # Get agent response using new dynamic approach
     try:
         # Defensive unpacking to handle edge cases
-        result = st.session_state.agent.answer_query(user_input)
+        result = st.session_state.agent.answer_query(sanitized_input)
         if isinstance(result, tuple) and len(result) >= 2:
             response, sources, *_ = result
         else:
@@ -181,11 +195,12 @@ def process_user_input(user_input: str):
             response = str(result) if result else "Erro ao processar sua pergunta."
             sources = []
         
-        # Validate response length (max 10 sentences for mobile-friendly display)
+        # Validate response length (max sentences for mobile-friendly display)
         is_valid, adjusted_response = ResponseValidator.validate_response(response, allow_detailed=False)
         
         if not is_valid:
             # Response was too long, truncated by validator
+            logger.info("Response was truncated for mobile UX")
             response = adjusted_response
         
         # Create justification
@@ -201,7 +216,8 @@ def process_user_input(user_input: str):
         )
         
     except Exception as e:
-        add_message("assistant", f"Erro ao processar sua mensagem. {str(e)}")
+        logger.error(f"Error processing user query: {e}")
+        add_message("assistant", f"Erro ao processar sua mensagem. Por favor, tente novamente.")
 
 
 def main():
