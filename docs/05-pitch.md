@@ -143,7 +143,7 @@ Moara: "Com perfil moderado, considere 'Tesouro Selic'.
 
 **[0:00 - 0:30] Abertura + Problema**
 
-"Oi, meu nome é [seu nome]. Quantos de vocês sabem exatamente quanto gastaram na última semana? [pausa]
+"Oi, meu nome é Marcus. Quantos de vocês sabem exatamente quanto gastaram na última semana? [pausa]
 
 Pois é. 70% dos brasileiros não têm controle adequado das suas finanças. E não é por falta de app - seu banco já tem um aplicativo. O problema é que ele é reativo: mostra o extrato, mas não te ajuda a entender o que está acontecendo. Você só percebe que gastou demais quando o dinheiro já acabou."
 
