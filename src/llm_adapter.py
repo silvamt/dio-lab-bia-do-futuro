@@ -732,24 +732,28 @@ Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a
         if any(keyword in text_lower for keyword in financial_keywords):
             return 1
         
-        # Greeting keywords
-        greeting_keywords = ['oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'eai', 'hey', 'ola']
+        # Greeting keywords (sorted by length descending to match longest first)
+        greeting_keywords = ['bom dia', 'boa tarde', 'boa noite', 'e aí', 'olá', 'ola', 'eai', 'hey', 'oi']
         
         # Pure greeting (no other content)
-        if any(text_lower.startswith(greeting) for greeting in greeting_keywords):
-            # Check if there's more content after greeting
-            for greeting in greeting_keywords:
-                if text_lower.startswith(greeting):
-                    remaining = text_lower[len(greeting):].strip()
-                    # If there's significant content after greeting, classify as financial if it matches
-                    if remaining and len(remaining) > 3:
-                        if any(keyword in remaining for keyword in financial_keywords):
-                            return 1
-                        else:
-                            return 0
-                    else:
-                        # Just greeting
-                        return 0
+        # Find the longest matching greeting to avoid substring issues
+        matched_greeting = None
+        for greeting in greeting_keywords:
+            if text_lower.startswith(greeting):
+                matched_greeting = greeting
+                break
+        
+        if matched_greeting:
+            remaining = text_lower[len(matched_greeting):].strip()
+            # If there's significant content after greeting, classify as financial if it matches
+            if remaining and len(remaining) > 3:
+                if any(keyword in remaining for keyword in financial_keywords):
+                    return 1
+                else:
+                    return 0
+            else:
+                # Just greeting
+                return 0
         
         # If not clearly greeting or financial, treat as valid (1) to let agent handle it
         return 1
