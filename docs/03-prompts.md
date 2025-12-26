@@ -1,9 +1,17 @@
 # Prompts do Agente
 
-## Arquitetura de IA - Nova Versão Dinâmica
+## Arquitetura de IA - Sistema de Duas Etapas
 
-**IMPORTANTE**: Este agente agora utiliza **IA generativa de forma dinâmica** para interpretar perguntas e analisar dados:
+**IMPORTANTE**: Este agente utiliza um **sistema de processamento em duas etapas** para otimizar recursos e melhorar a experiência:
 
+### Etapa 1: Classificação de Mensagens
+- **PRIMEIRA CHAMADA ao LLM**: Classifica a mensagem do usuário antes de processamento completo
+- **Três categorias**: -1 (inválida), 0 (saudação), 1 (válida/financeira)
+- **Respostas rápidas**: Mensagens -1 e 0 recebem respostas instantâneas sem análise de dados
+- **Economia de recursos**: Evita chamadas caras à API para mensagens simples
+
+### Etapa 2: Análise Financeira Completa
+- **SEGUNDA CHAMADA ao LLM**: Apenas para mensagens classificadas como 1 (válidas)
 - **Interpretação de perguntas**: IA recebe todos os dados disponíveis e interpreta livremente a pergunta do usuário
 - **Análise de dados**: IA analisa transações, perfil, histórico e produtos para responder
 - **Sem intenções pré-definidas**: Não há limitação a 5-6 tipos de respostas fixas
@@ -13,7 +21,40 @@
 
 ---
 
-## System Prompt do LLM
+## System Prompt do Classificador (Primeira Etapa)
+
+Este prompt é usado na PRIMEIRA CHAMADA para classificar rapidamente a mensagem:
+
+```
+Você é um classificador de mensagens de usuário.
+Sua única tarefa é classificar a mensagem recebida em um dos três estados abaixo e responder SOMENTE com um dos valores: -1, 0 ou 1. Não escreva mais nada.
+
+Estados:
+
+* -1 (inválida ou insuficiente): mensagem vazia, apenas espaços ou genérica sem conteúdo útil, como: 'nada', 'não sei', 'nao sei', 'ok', '.', '-', '...', 'tanto faz', 'qualquer coisa'.
+* 0 (saudação): apenas cumprimento ou abertura social, sem conteúdo financeiro, como: 'oi', 'olá', 'ola', 'bom dia', 'boa tarde', 'boa noite', 'e aí', 'eai'.
+* 1 (válida): qualquer intenção, pergunta ou informação financeira, mesmo que parcial, como objetivo, prazo, risco, valor, renda ou dívida. Exemplos: 'quero investir', 'reserva de emergência', 'curto prazo', 'risco médio', 'tenho 10 mil', 'cartão atrasado'.
+
+Regras:
+
+* Se houver qualquer intenção ou pergunta financeira, retorne 1, mesmo que comece com saudação.
+* Se for apenas saudação, retorne 0.
+* Se não houver conteúdo útil nem intenção financeira, retorne -1.
+* Nunca explique sua decisão.
+* Nunca retorne texto adicional.
+```
+
+**Comportamento baseado na classificação:**
+- **-1**: Sistema retorna mensagem explicando como o app funciona
+- **0**: Sistema retorna saudação personalizada com nome do usuário
+- **1**: Sistema prossegue para SEGUNDA CHAMADA com análise completa
+
+> [!IMPORTANT]
+> O classificador usa `temperature=0` para comportamento determinístico. Aceita apenas "-1", "0" ou "1" como resposta válida. Qualquer outro retorno é tratado como -1.
+
+---
+
+## System Prompt do Agente (Segunda Etapa)
 
 O LLM agora atua como **analista financeiro dinâmico**, recebendo todos os dados e a pergunta do usuário:
 
@@ -152,7 +193,35 @@ Após o LLM gerar a resposta, o sistema aplica validações:
 
 ## Exemplos de Interação
 
-### Cenário 1: Consulta de Gastos
+### Cenário 0: Mensagem Inválida (Classificada como -1)
+
+**Usuário:**
+```
+...
+```
+
+**Sistema (resposta rápida sem LLM de análise):**
+```
+Olá! Sou a Moara, sua assistente financeira. Posso te ajudar a entender seus gastos, planejar objetivos financeiros, analisar suas transações e recomendar produtos adequados ao seu perfil. Como posso te ajudar hoje?
+```
+
+---
+
+### Cenário 0.5: Saudação Simples (Classificada como 0)
+
+**Usuário:**
+```
+bom dia
+```
+
+**Sistema (resposta rápida sem LLM de análise):**
+```
+Olá, João Silva! Como posso te ajudar com suas finanças hoje?
+```
+
+---
+
+### Cenário 1: Consulta de Gastos (Classificada como 1)
 
 **Usuário:**
 ```
@@ -221,7 +290,12 @@ Análise baseada em transacoes.csv
 
 ### Mudanças da Arquitetura Anterior
 
-1. **Removida classificação de intenções**: Sistema não mais classifica em categorias fixas (gastos, alertas, metas, produtos)
+1. **Adicionado sistema de classificação em duas etapas**:
+   - PRIMEIRA CHAMADA: Classifica mensagem (-1, 0, ou 1)
+   - SEGUNDA CHAMADA: Análise completa apenas para mensagens válidas (1)
+   - Economia de recursos evitando processamento de saudações e mensagens inválidas
+
+2. **Removida classificação de intenções**: Sistema não mais classifica em categorias fixas (gastos, alertas, metas, produtos)
 
 2. **Removida lógica determinística**: Não há mais métodos específicos para cada tipo de resposta (detect_spending_increase, suggest_product, etc.)
 
@@ -237,14 +311,17 @@ Análise baseada em transacoes.csv
 
 ### Melhorias Implementadas
 
+- ✅ Sistema de classificação em duas etapas para otimização de recursos
+- ✅ Respostas instantâneas para saudações e mensagens inválidas
 - ✅ Arquitetura totalmente dinâmica sem intenções pré-definidas
-- ✅ LLM recebe todos os dados em cada consulta
+- ✅ LLM recebe todos os dados em cada consulta (para mensagens válidas)
 - ✅ Interpretação livre de perguntas
 - ✅ Respostas baseadas em análise completa dos dados
 - ✅ Funciona com qualquer pergunta relacionada aos dados financeiros
 - ✅ Mantém validação de tamanho (max 6 frases)
 - ✅ System prompt restritivo para evitar invenção de dados
 - ✅ Fallback determinístico quando LLM não disponível
+- ✅ CSS responsivo para evitar sobreposição de botões flutuantes do Streamlit Cloud
 
 ### Melhorias Futuras
 
