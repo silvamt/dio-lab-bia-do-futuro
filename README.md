@@ -82,7 +82,7 @@ Experimente perguntar à Moara (funciona com ou sem API key):
 - **Sugestões personalizadas**: Produtos adequados ao seu perfil
 
 ### UX Mobile-First
-- **Respostas curtas**: Máximo 2 frases na resposta principal
+- **Respostas concisas**: Máximo 6 frases (2-3 parágrafos curtos) na resposta principal
 - **Interface WhatsApp**: Bolhas de chat e entrada fixada no rodapé
 - **Detalhes sob demanda**: Botão "Ver detalhes" para informações estendidas
 - **Justificativas transparentes**: Cada resposta indica a fonte dos dados

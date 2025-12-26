@@ -29,7 +29,7 @@
 
 1. **Proativa, não reativa**: Detecta aumento atípico de gastos, identifica recorrências e sugere oportunidades de economia
 
-2. **Mobile-first**: Interface inspirada no WhatsApp com respostas curtas (máximo 2 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
+2. **Mobile-first**: Interface inspirada no WhatsApp com respostas concisas (máximo 6 frases). Você consulta suas finanças tão fácil quanto mandar mensagem
 
 3. **100% confiável**: Zero alucinação - system prompt restritivo garante que respostas sejam baseadas exclusivamente nos dados reais. LLM não inventa valores ou informações
 
@@ -155,7 +155,7 @@ Tem três diferenciais principais:
 
 Primeiro: é proativo. Detecta quando seus gastos aumentam 35% em uma semana e te avisa para você agir.
 
-Segundo: mobile-first. Respostas curtas, máximo 2 frases, como se fosse WhatsApp. Nada de paragrafos intermináveis.
+Segundo: mobile-first. Respostas concisas, máximo 6 frases em 2-3 parágrafos curtos, adequadas para mobile. Nada de textos intermináveis.
 
 Terceiro: 100% confiável. Zero alucinação. Todas as respostas baseadas exclusivamente nos seus dados reais. E cada resposta mostra a fonte - você sabe de onde vem a informação."
 

@@ -6,7 +6,7 @@
 O gerenciamento financeiro pessoal pode ser complexo e demorado. Muitas pessoas não percebem padrões de gastos problemáticos, perdem oportunidades de economia e têm dificuldade em planejar metas financeiras de forma realista. Além disso, a linguagem técnica do setor financeiro pode ser intimidadora e interfaces complexas afastam usuários.
 
 ### Solução
-Moara (MOARA – Modular Orchestrated AI for Responsible Advisory) é um agente financeiro proativo que utiliza lógica determinística para decisões e IA generativa apenas como camada de linguagem controlada, oferecendo clareza e transparência na gestão financeira. Moara monitora automaticamente os gastos do usuário, identifica padrões e oportunidades de melhoria, e oferece orientação personalizada de forma simples e direta. Com uma interface mobile-first inspirada no WhatsApp, Moara torna a gestão financeira acessível e conveniente, com respostas curtas (máximo 2 frases) adequadas para consulta rápida no celular.
+Moara (MOARA – Modular Orchestrated AI for Responsible Advisory) é um agente financeiro proativo que utiliza IA generativa controlada para análise de dados e geração de respostas, oferecendo clareza e transparência na gestão financeira. Moara monitora automaticamente os gastos do usuário, identifica padrões e oportunidades de melhoria, e oferece orientação personalizada de forma simples e direta. Com uma interface mobile-first inspirada no WhatsApp, Moara torna a gestão financeira acessível e conveniente, com respostas concisas (máximo 6 frases) adequadas para consulta rápida no celular.
 
 ### Público-Alvo
 Pessoas com renda estabelecida que desejam melhorar sua gestão financeira mas não têm tempo ou conhecimento técnico aprofundado. Especialmente usuários mobile que preferem interações rápidas e diretas, similares a apps de mensagem.
@@ -27,7 +27,7 @@ Pessoas com renda estabelecida que desejam melhorar sua gestão financeira mas n
 
 ### Tom de Comunicação
 - **Profissional mas acessível**: Linguagem clara, sem jargões
-- **Conciso**: Respostas principais com máximo 2 frases
+- **Conciso**: Respostas principais com máximo 6 frases (2-3 parágrafos curtos)
 - **Sem emojis**: Mantém seriedade apropriada ao contexto financeiro
 - **Direto**: Sem explicações longas a menos que solicitado
 

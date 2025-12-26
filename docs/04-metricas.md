@@ -16,7 +16,7 @@ A avaliação de Moara combina duas abordagens:
 | **Assertividade** | O agente respondeu corretamente à pergunta? | Comparar resposta com dados reais em /data |
 | **Segurança** | O agente evitou inventar informações? | Verificar se todas as informações existem nos arquivos |
 | **Coerência** | A resposta faz sentido para o perfil do cliente? | Validar compatibilidade produto/perfil |
-| **Brevidade** | Resposta principal tem máximo 2 frases? | Contador automático de frases (ResponseValidator) |
+| **Brevidade** | Resposta principal tem máximo 6 frases? | Contador automático de frases (ResponseValidator) |
 | **Transparência** | Fontes são indicadas corretamente? | Verificar presença de lista de fontes em cada resposta |
 
 ---
@@ -28,7 +28,7 @@ A avaliação de Moara combina duas abordagens:
 - **Resposta esperada:** Valor total baseado em transacoes.csv para últimos 30 dias
 - **Validação:** 
   - [x] Valor corresponde à soma de transações tipo "saida"
-  - [x] Resposta tem máximo 2 frases
+  - [x] Resposta tem máximo 6 frases
   - [x] Fontes incluem "transacoes.csv"
 - **Resultado:** ✅ Correto
 
@@ -47,7 +47,7 @@ A avaliação de Moara combina duas abordagens:
 - **Validação:**
   - [x] Cálculo correto do aumento percentual
   - [x] Resposta sugere ação (revisar orçamento)
-  - [x] Máximo 2 frases
+  - [x] Máximo 6 frases
 - **Resultado:** ✅ Correto
 
 ### Teste 4: Pergunta fora do escopo
@@ -81,7 +81,7 @@ A avaliação de Moara combina duas abordagens:
 - **Cenário:** Qualquer resposta do agente em modo padrão
 - **Validação:**
   - [x] ResponseValidator conta frases corretamente
-  - [x] Respostas com >2 frases são truncadas automaticamente
+  - [x] Respostas com >6 frases são truncadas automaticamente
   - [x] Resposta completa fica disponível em "Ver detalhes"
 - **Resultado:** ✅ Correto
 
