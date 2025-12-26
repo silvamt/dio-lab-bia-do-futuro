@@ -71,15 +71,15 @@ def validate_api_key(api_key: Optional[str]) -> bool:
     return True
 
 
-def get_secure_env_var(var_name: str) -> Optional[str]:
+def get_secure_api_key(var_name: str) -> Optional[str]:
     """
-    Safely retrieve environment variable with validation.
+    Safely retrieve API key from environment variable with validation.
     
     Args:
-        var_name: Name of environment variable
+        var_name: Name of environment variable containing API key
         
     Returns:
-        Environment variable value if valid, None otherwise
+        API key value if valid, None otherwise
     """
     try:
         value = os.getenv(var_name)
@@ -87,7 +87,7 @@ def get_secure_env_var(var_name: str) -> Optional[str]:
             return value
         return None
     except Exception as e:
-        logger.error(f"Error retrieving environment variable {var_name}: {e}")
+        logger.error(f"Error retrieving API key from {var_name}: {e}")
         return None
 
 

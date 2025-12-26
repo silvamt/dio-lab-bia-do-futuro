@@ -16,7 +16,7 @@ from constants import (
     MAX_TOKENS_LLM, LLM_TEMPERATURE,
     MAX_TRANSACTIONS_DISPLAY, MAX_HISTORY_DISPLAY
 )
-from security_utils import get_secure_env_var
+from security_utils import get_secure_api_key
 
 # Try to import optional LLM libraries
 try:
@@ -104,11 +104,11 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
     
     def _detect_provider(self) -> str:
         """Auto-detect available LLM provider from environment variables."""
-        if get_secure_env_var('OPENAI_API_KEY') and OPENAI_AVAILABLE:
+        if get_secure_api_key('OPENAI_API_KEY') and OPENAI_AVAILABLE:
             return 'openai'
-        elif get_secure_env_var('GEMINI_API_KEY') and GEMINI_AVAILABLE:
+        elif get_secure_api_key('GEMINI_API_KEY') and GEMINI_AVAILABLE:
             return 'gemini'
-        elif get_secure_env_var('ANTHROPIC_API_KEY') and ANTHROPIC_AVAILABLE:
+        elif get_secure_api_key('ANTHROPIC_API_KEY') and ANTHROPIC_AVAILABLE:
             return 'claude'
         else:
             return 'mock'
@@ -120,7 +120,7 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = get_secure_env_var('OPENAI_API_KEY')
+        api_key = get_secure_api_key('OPENAI_API_KEY')
         if not api_key:
             logger.warning("OPENAI_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
@@ -140,7 +140,7 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = get_secure_env_var('GEMINI_API_KEY')
+        api_key = get_secure_api_key('GEMINI_API_KEY')
         if not api_key:
             logger.warning("GEMINI_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
@@ -161,7 +161,7 @@ Ajudar o usuário a entender sua situação financeira e tomar decisões melhore
             self.provider = 'mock'
             return
         
-        api_key = get_secure_env_var('ANTHROPIC_API_KEY')
+        api_key = get_secure_api_key('ANTHROPIC_API_KEY')
         if not api_key:
             logger.warning("ANTHROPIC_API_KEY not found or invalid, falling back to mock")
             self.provider = 'mock'
