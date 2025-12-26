@@ -66,9 +66,6 @@ Experimente perguntar à Moara (funciona com ou sem API key):
 - "quanto saiu meu cartão" (entendido como consulta de gastos)
 - "algo seguro pra investir" (entendido como pedido de produtos)
 
-> [!TIP]
-> Na pasta [`examples/`](./examples/) você encontra referências de implementação para cada etapa deste desafio.
-
 ---
 
 ## 📋 Funcionalidades
