@@ -161,7 +161,8 @@ def initialize_session_state():
         st.session_state.messages = []
     
     # Initialize LLM adapter first (will use mock if no API key available)
-    if "llm_adapter" not in st.session_state:
+    # Check if adapter exists and has required methods (handles stale cached instances)
+    if "llm_adapter" not in st.session_state or not hasattr(st.session_state.llm_adapter, 'classify_user_message'):
         st.session_state.llm_adapter = LLMAdapter()
     
     if "agent" not in st.session_state:
