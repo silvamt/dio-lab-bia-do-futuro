@@ -86,6 +86,71 @@ st.markdown("""
         font-size: 12px;
         color: #666;
     }
+    
+    /* ================================================================
+       CSS para evitar sobreposição de botões flutuantes do Streamlit Cloud
+       no componente st.chat_input
+       ================================================================ */
+    
+    /* Reservar espaço inferior no container principal para acomodar chat input
+       e prevenir que conteúdo seja escondido por elementos fixos */
+    .block-container {
+        padding-bottom: 120px !important;
+    }
+    
+    /* Reservar espaço à direita do chat input para botões flutuantes
+       (Desktop - padrão) */
+    [data-testid="stChatInput"] {
+        padding-right: 80px !important;
+    }
+    
+    /* Garantir que o campo de texto dentro do chat input não seja coberto */
+    [data-testid="stChatInput"] > div {
+        margin-right: 0 !important;
+    }
+    
+    /* Ajustar o botão de envio para não ser coberto por ícones flutuantes */
+    [data-testid="stChatInput"] button {
+        margin-right: 10px !important;
+    }
+    
+    /* ================================================================
+       Media Queries Responsivas
+       ================================================================ */
+    
+    /* Tablets (≤768px) - aumentar padding para acomodar múltiplos ícones */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-bottom: 140px !important;
+        }
+        
+        [data-testid="stChatInput"] {
+            padding-right: 100px !important;
+        }
+    }
+    
+    /* Smartphones (≤480px) - aumentar ainda mais o padding devido ao
+       empilhamento de ícones em telas pequenas */
+    @media (max-width: 480px) {
+        .block-container {
+            padding-bottom: 160px !important;
+        }
+        
+        [data-testid="stChatInput"] {
+            padding-right: 120px !important;
+        }
+        
+        /* Ajustar o campo de entrada para melhor visualização em mobile */
+        [data-testid="stChatInput"] textarea {
+            padding-right: 10px !important;
+        }
+    }
+    
+    /* Garantir que o z-index do chat input seja adequado mas não conflite
+       com elementos flutuantes do Streamlit Cloud */
+    [data-testid="stChatInput"] {
+        z-index: 99 !important;
+    }
 </style>
 """, unsafe_allow_html=True)
 
