@@ -5,8 +5,9 @@ Provides functions to validate and sanitize user input to prevent injection atta
 
 import re
 import os
-from typing import Optional
 import logging
+from pathlib import Path
+from typing import Optional
 
 from constants import MAX_QUERY_LENGTH
 
@@ -102,8 +103,6 @@ def validate_file_path(file_path: str, base_dir: str) -> bool:
         True if path is safe, False otherwise
     """
     try:
-        from pathlib import Path
-        
         # Resolve both paths to absolute
         base = Path(base_dir).resolve()
         target = Path(file_path).resolve()

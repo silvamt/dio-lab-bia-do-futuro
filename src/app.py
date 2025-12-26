@@ -14,8 +14,7 @@ from response_validator import ResponseValidator
 from llm_adapter import LLMAdapter
 from security_utils import sanitize_user_input
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Get logger (assumes logging is configured elsewhere or by streamlit)
 logger = logging.getLogger(__name__)
 
 
