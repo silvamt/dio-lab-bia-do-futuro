@@ -717,7 +717,8 @@ Gere uma resposta clara e objetiva em 2-3 parágrafos curtos. Mencione de onde a
         if not text_lower or text_lower in ['.', '-', '...'] or text_lower in invalid_phrases:
             return -1
         
-        # Financial keywords
+        # Financial keywords - intentionally broad to allow messages through
+        # Better to classify as valid (1) and let agent handle it than to block user (-1)
         financial_keywords = [
             'investir', 'investimento', 'reserva', 'emergência', 'emergencia',
             'prazo', 'risco', 'renda', 'dívida', 'divida', 'cartão', 'cartao',

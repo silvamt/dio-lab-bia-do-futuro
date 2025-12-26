@@ -198,7 +198,7 @@ def process_user_input(user_input: str):
         
         elif classification == 0:
             # Greeting only
-            name = getattr(st.session_state, 'user_name', 'Cliente')
+            name = st.session_state.get('user_name', 'Cliente')
             response = f"Olá, {name}! Como posso te ajudar com suas finanças hoje?"
             add_message("assistant", response)
             return
